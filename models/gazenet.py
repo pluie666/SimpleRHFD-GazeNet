@@ -713,7 +713,7 @@ class SimpleRHFDGazeNet(pl.LightningModule):
 
         self.hbnet = HBNet()
         self.gazemodule = GazeModule(n_frames, use_rhfd=True, rhfd_dim=rhfd_output_dim)
-        self.gazemodule._make_deeper()  # upgrade MLP with dropout
+        # Note: _make_deeper() removed — caused overfitting (v4: 22.36°, v3: 21.49°)
         self.rhfd_extractor = MultiScaleRHFDExtractor(
             window_sizes=(3, 5, 7), hidden_dim=32, output_dim=rhfd_output_dim
         )
