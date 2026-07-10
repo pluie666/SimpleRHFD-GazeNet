@@ -191,12 +191,7 @@ class SpatialEntropy(nn.Module):
 
 
 class RHFDFeatureExtractor(nn.Module):
-    """
-    Complete RHFD feature extraction: Gf + Gd + Ga + Gv + Gs.
-
-    All features are computed from observable signals (head_dir, body_dv)
-    with no learnable parameters. Caller must wrap with torch.no_grad().
-    """
+    """Single-scale RHFD feature extraction: Gf + Gd + Ga + Gv + Gs at one window size."""
 
     def __init__(self, window_size: int = 3):
         super().__init__()
@@ -207,15 +202,6 @@ class RHFDFeatureExtractor(nn.Module):
         self.gs_extractor = SpatialEntropy(window_size=window_size)
 
     def forward(self, head_dir: torch.Tensor, body_dv: torch.Tensor = None):
-        """
-        Args:
-            head_dir: [B, T, 3] normalized head direction vectors
-            body_dv:  [B, T, 2] body velocity (optional, for Gv)
-
-        Returns:
-            dict with keys 'gf','gd','ga','gv','gs' each [B, T, 1],
-            and 'concat' [B, T, 5] for convenience.
-        """
         gf = self.gf_extractor(head_dir)
         gd = self.gd_extractor(head_dir)
         ga = self.ga_extractor(head_dir)
@@ -224,9 +210,63 @@ class RHFDFeatureExtractor(nn.Module):
             gv = self.gv_extractor(head_dir, body_dv)
         else:
             gv = torch.zeros_like(gf)
-
-        features = {
+        return {
             'gf': gf, 'gd': gd, 'ga': ga, 'gv': gv, 'gs': gs,
             'concat': torch.cat([gf, gd, ga, gv, gs], dim=-1),
         }
-        return features
+
+
+class MultiScaleRHFDExtractor(nn.Module):
+    """
+    Multi-scale RHFD feature extraction with learnable compression and gating.
+
+    Computes Gf, Gd, Ga, Gv, Gs at three temporal windows (W=3,5,7),
+    concatenates all 15 features, then:
+      1. Compresses via MLP: 15 → hidden → output_dim
+      2. Applies gating attention: weights features per frame
+    """
+
+    def __init__(self, window_sizes=(3, 5, 7), hidden_dim=32, output_dim=8):
+        super().__init__()
+        self.window_sizes = window_sizes
+        n_features = 5  # Gf, Gd, Ga, Gv, Gs
+        self.input_dim = n_features * len(window_sizes)  # 15
+
+        # One extractor per scale
+        self.extractors = nn.ModuleList([
+            RHFDFeatureExtractor(window_size=w) for w in window_sizes
+        ])
+
+        # Compression MLP: multi-scale → compact representation
+        self.compress = nn.Sequential(
+            nn.Linear(self.input_dim, hidden_dim),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(hidden_dim, output_dim),
+        )
+
+        # Per-frame gating: learn which features matter most for each frame
+        self.gate = nn.Sequential(
+            nn.Linear(self.input_dim, hidden_dim),
+            nn.ReLU(inplace=True),
+            nn.Linear(hidden_dim, output_dim),
+            nn.Sigmoid(),
+        )
+
+    def forward(self, head_dir: torch.Tensor, body_dv: torch.Tensor = None):
+        """
+        Returns:
+            'concat': [B, T, output_dim]  compressed + gated multi-scale features
+            'raw':    [B, T, input_dim]    raw multi-scale features (for diagnostics)
+        """
+        all_features = []
+        for extractor in self.extractors:
+            feats = extractor(head_dir, body_dv)
+            all_features.append(feats['concat'])
+        raw = torch.cat(all_features, dim=-1)  # [B, T, input_dim]
+
+        compressed = self.compress(raw)       # [B, T, output_dim]
+        gate = self.gate(raw)                 # [B, T, output_dim]
+        gated = compressed * gate             # element-wise gating
+
+        return {'concat': gated, 'raw': raw}

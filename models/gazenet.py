@@ -26,7 +26,7 @@ from models.loss import (
     compute_gaze_probability_loss,
     compute_temporal_smoothness_loss,
 )
-from models.rhfd_features import RHFDFeatureExtractor
+from models.rhfd_features import RHFDFeatureExtractor, MultiScaleRHFDExtractor
 from models.rhfd_mapping import GazeProbabilityHead, GazeDirectRegressionHead
 from models.twiesn import TWIESN
 from models.smoothing import ExponentialSmoothing, AdaptiveExponentialSmoothing
@@ -63,6 +63,33 @@ class GazeModule(pl.LightningModule):
             nn.ReLU(),
             nn.Linear(64, n_frames),
             nn.Softplus()
+        )
+
+    def _make_deeper(self):
+        """Upgrade direction and kappa heads to 3-layer MLP + Dropout."""
+        in_dim = 2 * 128 * self.n_frames  # 1792
+
+        # Deeper direction head: 3 layers + dropout
+        self.direction_layer = nn.Sequential(
+            nn.Linear(in_dim, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(128, 64),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(64, 3 * self.n_frames),
+        )
+
+        # Deeper kappa head: 3 layers + dropout
+        self.kappa_layer = nn.Sequential(
+            nn.Linear(in_dim, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(128, 64),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(64, self.n_frames),
+            nn.Softplus(),
         )
 
     def forward(self, x, rhfd_features=None):
@@ -671,23 +698,25 @@ class GazeNet(pl.LightningModule):
 
 class SimpleRHFDGazeNet(pl.LightningModule):
     """
-    Minimal RHFD-enhanced gaze network using the proven original GazeModule
-    architecture with 5 extra input channels (Gf + Gd + Ga + Gv + Gs).
+    Enhanced RHFD gaze network with multi-scale features + deep MLP + gating.
 
-    NO TWIESN, NO EMA, NO probability head — just the reliable GAFA pipeline
-    enhanced with RHFD fixation frequency, density, head stability,
-    head-body correlation, and spatial entropy features.
+    Multi-scale RHFD: Gf,Gd,Ga,Gv,Gs at W=3,5,7 → MLP compress → 8 dim output
+    Deeper GazeModule: 3-layer MLP + Dropout(0.1) for better feature utilization
+    Feature gating: per-frame learned importance weights over RHFD features.
 
-    Features weight decay + cosine LR schedule to combat overfitting.
+    Frozen HBNet + Cosine LR + Weight Decay.
     """
 
-    def __init__(self, n_frames: int = 7):
+    def __init__(self, n_frames: int = 7, rhfd_output_dim: int = 8):
         super().__init__()
         self.n_frames = n_frames
 
         self.hbnet = HBNet()
-        self.gazemodule = GazeModule(n_frames, use_rhfd=True, rhfd_dim=5)
-        self.rhfd_extractor = RHFDFeatureExtractor(window_size=3)
+        self.gazemodule = GazeModule(n_frames, use_rhfd=True, rhfd_dim=rhfd_output_dim)
+        self.gazemodule._make_deeper()  # upgrade MLP with dropout
+        self.rhfd_extractor = MultiScaleRHFDExtractor(
+            window_sizes=(3, 5, 7), hidden_dim=32, output_dim=rhfd_output_dim
+        )
 
         self.automatic_optimization = False
 
@@ -720,7 +749,7 @@ class SimpleRHFDGazeNet(pl.LightningModule):
                 head_outputs['direction'].detach(),
                 body_dv.detach(),
             )
-        rhfd_concat = features['concat'].detach()  # [B,T,5]
+        rhfd_concat = features['concat'].detach()  # [B,T,output_dim]
 
         # Rotation normalization
         reference_rad = head_outputs['direction'][:, self.n_frames // 2]
