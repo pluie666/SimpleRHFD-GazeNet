@@ -120,8 +120,8 @@ class PoseFeatureExtractor(nn.Module):
             torso_angle,                            # 1 dim
         ], dim=-1)  # 6 dims total
 
-        # Compress
-        compressed = self.compress(raw_features)  # [B, T, output_dim]
+        # Compress (cast to float32 for mixed precision compatibility)
+        compressed = self.compress(raw_features.float())  # [B, T, output_dim]
 
         return {
             'concat': compressed,

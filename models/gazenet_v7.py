@@ -45,8 +45,13 @@ class SimpleRHFDGazeNetV7(pl.LightningModule):
 
         with torch.no_grad():
             rf = self.rhfd_extractor(ho['direction'].detach(), body_dv.detach())['concat'].detach()
-            if kp is not None:
-                pf = self.pose_extractor(kp, hp, bp, dv3d, ht)['concat'].detach()
+            if kp is not None and hp is not None:
+                pf = self.pose_extractor(
+                    kp.float(), hp.float() if hp is not None else None,
+                    bp.float() if bp is not None else None,
+                    dv3d.float() if dv3d is not None else None,
+                    ht.float() if ht is not None else None,
+                )['concat'].detach()
             else:
                 pf = torch.zeros(B, T, 6, device=img.device)
 
