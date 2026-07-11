@@ -44,12 +44,12 @@ Body Image [B,T,3,256,192] + Head Mask + Body Velocity
     │
     ▼
 ┌──────────────────────────────┐
-│  Rotation Normalization       │
+│  Rotation Normalization      │
 └──────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────┐
-│    Enhanced GazeModule (770K)     │
+│    Enhanced GazeModule (770K)    │
 │  LSTM(11→128, bidir×2)           │
 │  → Flatten → FC → direction + κ  │
 └──────────────────────────────────┘
