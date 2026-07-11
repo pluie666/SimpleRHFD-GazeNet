@@ -180,6 +180,7 @@ SimpleRHFD-GazeNet 保留 GAFA 的两阶段设计：
 
 ![训练曲线](figs/fig_training_curve.png)
 ![注视对比](figs/fig_gaze_comparison.png)
+![注视样本](figs/fig_gaze_samples.png)
 
 ---
 

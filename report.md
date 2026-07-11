@@ -174,6 +174,7 @@ The validation-test gap of ~13.8° indicates strong domain shift between trainin
 
 ![Training Curve](figs/fig_training_curve.png)
 ![Gaze Comparison](figs/fig_gaze_comparison.png)
+![Gaze Samples](figs/fig_gaze_samples.png)
 
 ---
 
