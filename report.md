@@ -34,6 +34,8 @@ We show that these features can be computed entirely from the model's existing i
 
 ### 3.1 Architecture Overview
 
+![Architecture](figs/fig_architecture.png)
+
 SimpleRHFD-GazeNet retains the GAFA two-stage design:
 
 ```
@@ -89,6 +91,8 @@ All five features are computed from normalized head direction vectors $\vec{h}_t
 
 All features are computed per frame with a temporal window of $W=3$ (matching the 7-frame LSTM context). Padding uses replication at sequence boundaries.
 
+![RHFD Features](figs/fig_rhfd_features.png)
+
 **Gradient isolation** is critical: angular computations ($\arccos$) have singular gradients at $\pm 1$, where $\partial \arccos(x)/\partial x = -1/\sqrt{1-x^2} \to \pm\infty$. Without `torch.no_grad()`, training diverges to NaN within the first epoch. All RHFD features are computed in a `with torch.no_grad()` block and explicitly detached before concatenation.
 
 ### 3.3 Training Configuration
@@ -125,6 +129,10 @@ We use the GAFA dataset with the standard train/test split. The training set com
 
 Our model achieves a **0.21° improvement** on overall 3D MAE and a **0.82° improvement** on frontal gaze while reducing trainable parameters by **91.9%**. Multi-scale RHFD features and gating contribute marginally (21.45° vs 21.48°), while data augmentation and strong regularization narrow the validation-test gap from 13.8° to 6.7°, substantially improving training health.
 
+![Results Table](figs/fig_results_table.png)
+
+![Error Distribution](figs/fig_error_dist.png)
+
 #### 4.2.2 Full Ablation Studies
 
 | Experiment | val MAE | Test 3D MAE | Key Finding |
@@ -138,6 +146,8 @@ Our model achieves a **0.21° improvement** on overall 3D MAE and a **0.82° imp
 | **v6: +horizontal flip aug + weight_decay=5e-3** | **14.8°** | **21.48°** | **Generalization gap halved** |
 
 The validation-test gap narrowed from 13.8° (v3) to 6.7° (v6), demonstrating that strong regularization and data augmentation effectively suppressed overfitting without hurting test performance.
+
+![Ablation Study](figs/fig_ablation.png)
 
 #### 4.2.3 NaN Resolution
 
@@ -161,6 +171,9 @@ With frozen HBNet, validation MAE converges rapidly and remains stable:
 | 18 | 7.69° | 21.49° |
 
 The validation-test gap of ~13.8° indicates strong domain shift between training and test scenes—a property inherited from the original GAFA framework, not introduced by our method.
+
+![Training Curve](figs/fig_training_curve.png)
+![Gaze Comparison](figs/fig_gaze_comparison.png)
 
 ---
 

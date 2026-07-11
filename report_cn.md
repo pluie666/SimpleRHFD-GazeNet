@@ -40,6 +40,8 @@ RHFD 方法利用注视状态特征——包括注视变化频率（Gf）、注�
 
 ### 3.1 总体架构
 
+![架构图](figs/fig_architecture.png)
+
 SimpleRHFD-GazeNet 保留 GAFA 的两阶段设计：
 
 ```
@@ -95,6 +97,8 @@ SimpleRHFD-GazeNet 保留 GAFA 的两阶段设计：
 
 所有特征以 $W=3$ 的时间窗口逐帧计算（匹配 7 帧 LSTM 的上下文长度），序列边界使用复制填充。
 
+![RHFD特征](figs/fig_rhfd_features.png)
+
 **梯度隔离至关重要**：反余弦运算 $\arccos(x)$ 在 $x \to \pm 1$ 处梯度奇异，$\partial \arccos(x)/\partial x = -1/\sqrt{1-x^2} \to \pm\infty$。若不做梯度隔离，训练在第一轮即发散为 NaN。所有 RHFD 特征均在 `with torch.no_grad()` 块中计算，拼接前显式调用 `.detach()`。
 
 ### 3.3 训练配置
@@ -131,6 +135,10 @@ SimpleRHFD-GazeNet 保留 GAFA 的两阶段设计：
 
 本文模型在 3D 总体 MAE 上实现 **0.21° 提升**，正面注视上实现 **0.82° 提升**，同时将可训练参数减少 **91.9%**。多尺度 RHFD 特征与特征门控对性能有边际贡献（21.45° vs 21.48°），数据增强与强正则化将验证-测试 gap 从 13.8° 缩小至 6.7°，显著改善了过拟合。
 
+![结果表格](figs/fig_results_table.png)
+
+![误差分布](figs/fig_error_dist.png)
+
 #### 4.2.2 完整消融实验
 
 | 实验 | 验证 MAE | 测试 3D MAE | 关键发现 |
@@ -144,6 +152,8 @@ SimpleRHFD-GazeNet 保留 GAFA 的两阶段设计：
 | **v6: +水平翻转增强 + weight_decay=5e-3** | **14.8°** | **21.48°** | **泛化 gap 缩小 50%** |
 
 验证-测试 gap 从 v3 的 13.8° 降至 v6 的 6.7°，证明强正则化与数据增强有效抑制了过拟合，使模型训练更加稳定、健康。
+
+![消融实验](figs/fig_ablation.png)
 
 #### 4.2.3 NaN 问题溯源与修复
 
@@ -167,6 +177,9 @@ SimpleRHFD-GazeNet 保留 GAFA 的两阶段设计：
 | 18 | 7.69° | 21.49° |
 
 验证-测试差距约 13.8°，表明训练与测试场景间存在强烈的领域偏移——这是 GAFA 框架本身的固有属性，非本文方法引入。
+
+![训练曲线](figs/fig_training_curve.png)
+![注视对比](figs/fig_gaze_comparison.png)
 
 ---
 
