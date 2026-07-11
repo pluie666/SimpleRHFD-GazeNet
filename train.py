@@ -9,10 +9,19 @@ from torch.utils.data import DataLoader, Subset
 
 from dataloader.gafa import create_gafa_dataset
 from models.gazenet import GazeNet, SimpleRHFDGazeNet
+from models.gazenet_v7 import SimpleRHFDGazeNetV7
 
 
 def train(opt):
-    if opt.simple:
+    if opt.v7:
+        from models.gazenet_v7 import SimpleRHFDGazeNetV7
+        model = SimpleRHFDGazeNetV7(n_frames=opt.n_frames)
+        if opt.weights and os.path.exists(opt.weights):
+            model.load_pretrained_hbnet(opt.weights, freeze=opt.freeze_hbnet)
+            print(f"Loaded HBNet weights from {opt.weights}")
+        else:
+            print("WARNING: No pretrained weights found, HBNet randomly initialized")
+    elif opt.simple:
         model = SimpleRHFDGazeNet(n_frames=opt.n_frames)
         # Load pretrained HBNet weights (freeze to prevent overfitting)
         if opt.weights and os.path.exists(opt.weights):
@@ -101,6 +110,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--quick", action="store_true", default=False,
         help="Quick debug mode: single scene + fewer epochs"
+    )
+    parser.add_argument(
+        "--v7", action="store_true", default=False,
+        help="Use SimpleRHFDGazeNetV7 (GazeD gaze-point + UAGE pose features + RHFD)"
     )
     parser.add_argument(
         "--simple", action="store_true", default=False,
