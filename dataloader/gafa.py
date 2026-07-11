@@ -74,6 +74,9 @@ class GazeSeqDataset(Dataset):
         body_dv = np.stack(item_allframe['body_dv']).copy()
         body_dv_3d = np.stack(item_allframe['body_dv_3d']).copy()
         height = np.stack(item_allframe['height']).copy()
+        keypoints = np.stack(item_allframe['keypoints']).copy()  # [T, 17, 2]
+        head_pos = np.stack(item_allframe['head_pos']).copy()    # [T, 3]
+        body_pos = np.stack(item_allframe['body_pos']).copy()    # [T, 3]
 
         # Horizontal flip augmentation (consistent across all frames)
         if augment and np.random.rand() > 0.5:
@@ -109,6 +112,9 @@ class GazeSeqDataset(Dataset):
             'R': torch.from_numpy(item_allframe['R'][0]),
             't': torch.from_numpy(item_allframe['t'][0]),
             'height': torch.from_numpy(height),
+            'keypoints': torch.from_numpy(keypoints),
+            'head_pos': torch.from_numpy(head_pos),
+            'body_pos': torch.from_numpy(body_pos),
         }
 
         return ret_item
@@ -139,7 +145,10 @@ class GazeSeqDataset(Dataset):
                 "body_dv_3d": self.body_dv_3d[j],
                 "R": self.R_cam,
                 "t": self.t_cam,
-                "height": self.height[j]
+                "height": self.height[j],
+                "keypoints": self.keypoints[j] if hasattr(self, 'keypoints') and len(self.keypoints) > j else np.zeros((17,2)),
+                "head_pos": self.head_pos[j],
+                "body_pos": self.body_pos[j],
             }
 
             for k, v in item.items():
