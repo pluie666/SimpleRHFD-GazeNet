@@ -77,30 +77,33 @@ def fig_architecture():
 # 2. Gaze Comparison Visualization (arrows on images)
 # ══════════════════════════════════════════════════════════
 def fig_gaze_comparison(model):
-    dset = create_gafa_dataset(7, ['living_room/006'], root_dir='./data/preprocessed', interval=1)
-    loader = DataLoader(dset, batch_size=1, shuffle=True)
+    dset = create_gafa_dataset(7, ['living_room/004'], root_dir='./data/preprocessed', interval=1)
+    loader = DataLoader(dset, batch_size=1, shuffle=True, num_workers=0)
+    it = iter(loader)
 
     fig, axes = plt.subplots(2, 3, figsize=(14, 9))
     for idx, ax_row in enumerate(axes):
-        ri = int(np.random.randint(0, max(1, len(dset))))
-        batch = dset[ri]
-        # Ensure we have 7-frame batch
-        if batch['image'].shape[0] < 7:
-            continue
-        img = batch['image'].unsqueeze(0).cuda()
-        hm = batch['head_mask'].unsqueeze(0).cuda()
-        dv = batch['body_dv'].unsqueeze(0).cuda()
-        gt = batch['gaze_dir'].numpy()
+        # Use DataLoader to guarantee correct batch format
+        batch = next(it)
+        n_frames = batch['image'].shape[1]  # [1, T, C, H, W]
+        if n_frames < 3:
+            batch = next(it)  # retry
+            n_frames = batch['image'].shape[1]
+        center = n_frames // 2
+
+        img = batch['image'].cuda()
+        hm = batch['head_mask'].cuda()
+        dv = batch['body_dv'].cuda()
+        gt = batch['gaze_dir'].numpy()[0]  # [T, 3]
 
         with torch.no_grad():
             res, head_r, body_r = model(img, hm, dv)
-        pred = res['direction'].cpu().numpy()
-        head = head_r['direction'].cpu().numpy()
-        body = body_r['direction'].cpu().numpy()
+        pred = res['direction'].cpu().numpy()[0]     # [T, 3]
+        head = head_r['direction'].cpu().numpy()[0]  # [T, 3]
+        body = body_r['direction'].cpu().numpy()[0]  # [T, 3]
 
-        center = min(3, pred.shape[1] // 2)  # center frame index
         # Denormalize center frame
-        img_np = batch['image'].numpy()[center]
+        img_np = batch['image'].numpy()[0, center]
         img_np = img_np.transpose(1, 2, 0) * np.array([0.229, 0.224, 0.225]) + np.array([0.485, 0.456, 0.406])
         img_np = np.clip(img_np, 0, 1)
 
