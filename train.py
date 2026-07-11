@@ -59,7 +59,8 @@ def train(opt):
 
     random.shuffle(train_exp_names)
     dset = create_gafa_dataset(
-        n_frames=opt.n_frames, exp_names=train_exp_names, interval=1
+        n_frames=opt.n_frames, exp_names=train_exp_names, interval=1,
+        augment=opt.augment,
     )
     train_idx = np.arange(0, int(len(dset) * 0.9))
     val_idx = np.arange(int(len(dset) * 0.9), len(dset))
@@ -116,6 +117,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--no_freeze_hbnet", action="store_false", dest="freeze_hbnet",
         help="Allow HBNet fine-tuning"
+    )
+    parser.add_argument(
+        "--augment", action="store_true", default=True,
+        help="Enable random horizontal flip augmentation"
+    )
+    parser.add_argument(
+        "--no_augment", action="store_false", dest="augment",
+        help="Disable data augmentation"
     )
 
     # RHFD features

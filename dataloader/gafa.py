@@ -10,9 +10,10 @@ from torch.utils.data import Dataset, ConcatDataset
 
 
 class GazeSeqDataset(Dataset):
-    def __init__(self, video_path, n_frames, interval):
+    def __init__(self, video_path, n_frames, interval, augment=False):
         self.video_path = video_path
         self.n_frames = n_frames
+        self.augment = augment
 
         # load annotation
         with open(os.path.join(video_path, 'annotation.pickle'), "rb") as f:
@@ -64,7 +65,7 @@ class GazeSeqDataset(Dataset):
     def __len__(self):
         return len(self.valid_index)
 
-    def transform(self, item_allframe):
+    def transform(self, item_allframe, augment=False):
         image = torch.stack(item_allframe['image'])
         head_dir = np.stack(item_allframe['head_dir']).copy()
         body_dir = np.stack(item_allframe['body_dir']).copy()
@@ -73,6 +74,16 @@ class GazeSeqDataset(Dataset):
         body_dv = np.stack(item_allframe['body_dv']).copy()
         body_dv_3d = np.stack(item_allframe['body_dv_3d']).copy()
         height = np.stack(item_allframe['height']).copy()
+
+        # Horizontal flip augmentation (consistent across all frames)
+        if augment and np.random.rand() > 0.5:
+            image = image.flip(-1)  # flip width dimension
+            head_dir[:, 0] *= -1    # negate x-component
+            body_dir[:, 0] *= -1
+            gaze_dir[:, 0] *= -1
+            body_dv[:, 0] *= -1     # negate dx
+            head_bb[:, 0] = 1.0 - head_bb[:, 0] - head_bb[:, 2]  # mirror x
+            # head_mask will be created from mirrored head_bb below
 
         # create mask of head bounding box
         head_mask = torch.zeros(image.shape[0], 1, image.shape[2], image.shape[3])
@@ -134,12 +145,12 @@ class GazeSeqDataset(Dataset):
             for k, v in item.items():
                 item_allframe[k].append(v)
 
-        item_allframe = self.transform(item_allframe)
+        item_allframe = self.transform(item_allframe, augment=self.augment)
 
         return item_allframe
 
 
-def create_gafa_dataset(n_frames, exp_names, root_dir='./data/preprocessed', interval=1):
+def create_gafa_dataset(n_frames, exp_names, root_dir='./data/preprocessed', interval=1, augment=False):
     exp_dirs = [os.path.join(root_dir, en) for en in exp_names]
 
     dset_list = []
@@ -149,7 +160,7 @@ def create_gafa_dataset(n_frames, exp_names, root_dir='./data/preprocessed', int
             if not os.path.exists(os.path.join(ed, cm, 'annotation.pickle')):
                 continue
 
-            dset = GazeSeqDataset(os.path.join(ed, cm), n_frames, interval)
+            dset = GazeSeqDataset(os.path.join(ed, cm), n_frames, interval, augment=augment)
 
             if len(dset) == 0:
                 continue

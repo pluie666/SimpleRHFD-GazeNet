@@ -776,11 +776,11 @@ class SimpleRHFDGazeNet(pl.LightningModule):
     def configure_optimizers(self):
         opt_direction = torch.optim.AdamW(
             filter(lambda p: p.requires_grad, self.parameters()),
-            lr=1e-4, weight_decay=1e-4
+            lr=1e-4, weight_decay=5e-3
         )
         opt_kappa = torch.optim.AdamW(
             filter(lambda p: p.requires_grad, self.parameters()),
-            lr=1e-4, weight_decay=1e-4
+            lr=1e-4, weight_decay=5e-3
         )
         # Cosine annealing over training steps
         sched_direction = torch.optim.lr_scheduler.CosineAnnealingLR(opt_direction, T_max=100000)
