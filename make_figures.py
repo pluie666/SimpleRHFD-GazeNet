@@ -383,19 +383,21 @@ def fig_directions(model):
     from mpl_toolkits.mplot3d import Axes3D  # noqa
 
     dset = create_gafa_dataset(7, ['living_room/004'], root_dir='./data/preprocessed', interval=1)
-    batch = dset[0]
-    img = batch['image'].unsqueeze(0).cuda()
-    hm = batch['head_mask'].unsqueeze(0).cuda()
-    dv = batch['body_dv'].unsqueeze(0).cuda()
-    gt = batch['gaze_dir'].numpy()
+    loader = DataLoader(dset, batch_size=1, shuffle=True, num_workers=0)
+    batch = next(iter(loader))
+    n_frames = batch['image'].shape[1]
+    img = batch['image'].cuda()
+    hm = batch['head_mask'].cuda()
+    dv = batch['body_dv'].cuda()
+    gt = batch['gaze_dir'].numpy()[0]
 
     with torch.no_grad():
         res, head_r, body_r = model(img, hm, dv)
-    pred = res['direction'].cpu().numpy()
-    head = head_r['direction'].cpu().numpy()
-    body = body_r['direction'].cpu().numpy()
+    pred = res['direction'].cpu().numpy()[0]
+    head = head_r['direction'].cpu().numpy()[0]
+    body = body_r['direction'].cpu().numpy()[0]
 
-    center = min(3, pred.shape[1] // 2)
+    center = n_frames // 2
     fig = plt.figure(figsize=(12, 5))
     titles = ['Head Direction', 'Body Direction', 'Gaze (GT vs Pred)']
     dir_sets = [
