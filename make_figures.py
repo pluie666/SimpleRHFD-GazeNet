@@ -82,7 +82,11 @@ def fig_gaze_comparison(model):
 
     fig, axes = plt.subplots(2, 3, figsize=(14, 9))
     for idx, ax_row in enumerate(axes):
-        batch = dset[np.random.randint(0, len(dset))]
+        ri = int(np.random.randint(0, max(1, len(dset))))
+        batch = dset[ri]
+        # Ensure we have 7-frame batch
+        if batch['image'].shape[0] < 7:
+            continue
         img = batch['image'].unsqueeze(0).cuda()
         hm = batch['head_mask'].unsqueeze(0).cuda()
         dv = batch['body_dv'].unsqueeze(0).cuda()
@@ -94,8 +98,9 @@ def fig_gaze_comparison(model):
         head = head_r['direction'].cpu().numpy()
         body = body_r['direction'].cpu().numpy()
 
+        center = min(3, pred.shape[1] // 2)  # center frame index
         # Denormalize center frame
-        img_np = batch['image'].numpy()[3]
+        img_np = batch['image'].numpy()[center]
         img_np = img_np.transpose(1, 2, 0) * np.array([0.229, 0.224, 0.225]) + np.array([0.485, 0.456, 0.406])
         img_np = np.clip(img_np, 0, 1)
 
@@ -106,7 +111,7 @@ def fig_gaze_comparison(model):
         ]):
             ax = ax_row[col]
             ax.imshow(img_np)
-            d3 = dir_arr[3]
+            d3 = dir_arr[center]
             d2 = d3[:2] / (np.linalg.norm(d3[:2]) + 1e-8)
             cx, cy = 80, 50
             ax.arrow(cx, cy, d2[0]*40, d2[1]*40, color=color, width=3, head_width=8, head_length=8)
@@ -387,12 +392,13 @@ def fig_directions(model):
     head = head_r['direction'].cpu().numpy()
     body = body_r['direction'].cpu().numpy()
 
+    center = min(3, pred.shape[1] // 2)
     fig = plt.figure(figsize=(12, 5))
     titles = ['Head Direction', 'Body Direction', 'Gaze (GT vs Pred)']
     dir_sets = [
-        [('Head', head[3], '#3498db')],
-        [('Body', body[3], '#e67e22')],
-        [('Ground Truth', gt[3], '#2ecc71'), ('Predicted', pred[3], '#e74c3c')],
+        [('Head', head[center], '#3498db')],
+        [('Body', body[center], '#e67e22')],
+        [('Ground Truth', gt[center], '#2ecc71'), ('Predicted', pred[center], '#e74c3c')],
     ]
 
     for idx in range(3):
