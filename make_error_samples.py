@@ -127,26 +127,30 @@ def main():
 
         ax.set_title(f'Error: {s["error"]:.1f}°', fontsize=13, fontweight='bold',
                      color='#c0392b' if s['error'] > 25 else '#27ae60')
-        ax.text(5, 245, f'Scene: {s["scene"]}', fontsize=8, color='white',
+        ax.text(5, 10, f'{s["scene"]}', fontsize=8, color='white',
                 bbox=dict(boxstyle='round,pad=0.2', facecolor='black', alpha=0.5))
         ax.axis('off')
 
-    # Legend
+    # Hide unused subplots
+    for i in range(len(selected), n_rows * n_cols):
+        axes.flat[i].axis('off')
+
+    # Legend placed above the title, outside plot area
     from matplotlib.patches import Patch
     legend_elements = [
         Patch(facecolor='#2ecc71', label='Ground Truth'),
         Patch(facecolor='#e74c3c', label='Predicted (Ours)'),
         Patch(facecolor='#3498db', label='Head Direction'),
     ]
-    fig.legend(handles=legend_elements, loc='lower center', ncol=3, fontsize=12, frameon=False)
-
-    # Hide unused subplots
-    for i in range(len(selected), n_rows * n_cols):
-        axes.flat[i].axis('off')
 
     fig.suptitle('Per-Sample Gaze Estimation: Ground Truth vs SimpleRHFD-GazeNet',
-                 fontsize=15, fontweight='bold', y=1.02)
-    fig.tight_layout()
+                 fontsize=15, fontweight='bold', y=0.98)
+
+    # Tight layout first, then add legend above
+    fig.tight_layout(rect=[0, 0, 1, 0.92])
+    fig.legend(handles=legend_elements, loc='upper center',
+               bbox_to_anchor=(0.5, 0.96), ncol=3, fontsize=11, frameon=False)
+
     fig.savefig('figs/fig_gaze_samples.png')
     plt.close()
     print(f'[OK] fig_gaze_samples.png ({len(selected)} examples, error range: '
