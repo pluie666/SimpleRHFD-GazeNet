@@ -71,8 +71,8 @@ pip install pytorch-lightning efficientnet-pytorch albumentations opencv-python-
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/pluie666/dynamic-3d-gaze-from-afar.git
-cd dynamic-3d-gaze-from-afar
+git clone https://github.com/pluie666/SimpleRHFD-GazeNet.git
+cd SimpleRHFD-GazeNet
 pip install pytorch-lightning efficientnet-pytorch albumentations opencv-python-headless matplotlib tqdm
 ```
 

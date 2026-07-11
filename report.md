@@ -210,7 +210,7 @@ Our work suggests that gaze-state features are a promising, low-cost signal for 
 
 ## Appendix: Implementation Details
 
-The code is available at `https://github.com/pluie666/dynamic-3d-gaze-from-afar` under the `main` branch. Key files:
+The code is available at `https://github.com/pluie666/SimpleRHFD-GazeNet` under the `main` branch. Key files:
 
 | File | Description |
 |------|-------------|

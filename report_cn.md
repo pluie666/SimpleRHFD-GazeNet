@@ -217,7 +217,7 @@ SimpleRHFD-GazeNet 保留 GAFA 的两阶段设计：
 
 ## 附录：实现细节
 
-代码仓库：`https://github.com/pluie666/dynamic-3d-gaze-from-afar`（`main` 分支）。核心文件：
+代码仓库：`https://github.com/pluie666/SimpleRHFD-GazeNet`（`main` 分支）。核心文件：
 
 | 文件 | 说明 |
 |------|------|
