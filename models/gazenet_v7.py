@@ -90,7 +90,7 @@ class SimpleRHFDGazeNetV7(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         img, hm, dv = batch['image'], batch['head_mask'], batch['body_dv']
-        kp, hp, bp = batch.get('keypoints'), batch.get('body_pos'), batch.get('body_pos')
+        kp, hp, bp = batch.get('keypoints'), batch.get('head_pos'), batch.get('body_pos')
         res, hr, br = self.forward(img, hm, dv, kp, hp, bp,
                                    batch.get('body_dv_3d'), batch.get('height'))
         if torch.isnan(res['direction']).any():
@@ -124,7 +124,7 @@ class SimpleRHFDGazeNetV7(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         img, hm, dv = batch['image'], batch['head_mask'], batch['body_dv']
         res, _, _ = self.forward(img, hm, dv, batch.get('keypoints'),
-                                 batch.get('body_pos'), batch.get('body_pos'),
+                                 batch.get('head_pos'), batch.get('body_pos'),
                                  batch.get('body_dv_3d'), batch.get('height'))
         m = compute_mae(res['direction'], batch['gaze_dir'])
         self.log('val_mae', m)
@@ -140,7 +140,7 @@ class SimpleRHFDGazeNetV7(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         img, hm, dv = batch['image'], batch['head_mask'], batch['body_dv']
         res, _, _ = self.forward(img, hm, dv, batch.get('keypoints'),
-                                 batch.get('body_pos'), batch.get('body_pos'),
+                                 batch.get('head_pos'), batch.get('body_pos'),
                                  batch.get('body_dv_3d'), batch.get('height'))
         pred, gl = res['direction'], batch['gaze_dir']
         if gl.shape[-1] == 3:
