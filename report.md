@@ -292,7 +292,19 @@ We present **SimpleRHFD-GazeNet**, demonstrating that five gaze-state temporal f
 
 We also explored pose features (2D keypoints + 3D head/body positions) inspired by UAGE (ACCV 2024) and gaze-point encoding (3D spatial point regression + L2 loss) inspired by GazeD (3DV 2026). These additional modules extended the GazeModule LSTM input from 11 to 20 dimensions but yielded test MAE of 21.52° and 21.80°, respectively — statistically indistinguishable from v6's 21.48°. This ablation result suggests that in the GAFA distant low-resolution setting, temporal statistical features ($G_f$, $G_d$) from head direction sequences already capture the primary gaze cues, with pose and spatial features providing marginal additional information. This negative result offers valuable guidance for feature engineering in distant gaze estimation.
 
-#### 6.1 Methodological Comparison: Lightweight Temporal Features vs Heavy Models
+#### 6.1 Training Efficiency and Methodological Comparison
+
+| | GAFA [1] | UAGE [26] | GazeD [27] | **SimpleRHFD** |
+|------|:---:|:---:|:---:|:---:|
+| Vision backbone | EfficientNet-B0 | ResNet-18 × 4 + STGCN | HRNet + RT-DETR | EfficientNet-B0 (frozen) |
+| Uncertainty | vMF κ | CVAE | Diffusion H=20, N=20 | vMF κ |
+| Batch size | 32 | — | 64 | 32 |
+| Training epochs | 100 | — | 100 | **10** |
+| Learning rate | 1e-4 | — | 6e-4, linear decay | 1e-4, cosine |
+| Data augmentation | None | — | None | Horizontal flip |
+| Epochs to converge | ~50 | — | ~100 | **1-2** |
+| Trainable params | 9.5M | >10M | >20M | **770K** |
+| Time/epoch (V100) | ~3h | — | — | **~1h** |
 
 The three methods on the GAFA benchmark represent distinct design philosophies:
 
