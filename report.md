@@ -204,6 +204,7 @@ We report 3D (full direction) and 2D (image-plane projection) MAE, split by fron
 | UAGE [26] | 15.3 | 23.5 | 18.1 | 18.7 | 23.8 | 18.8 | 23.7 | 20.5 |
 | GazeD [27] (AVG) | 15.8 | **19.3** | 18.2 | **17.6** | 25.3 | — | — | **19.5** |
 | GazeD [27] (Oracle) | **11.6** | 13.2 | **14.6** | 14.2 | **23.9** | — | — | **15.9** |
+| **SimpleRHFD (ours)** | **14.3** | 24.7 | 18.8 | 19.5 | 25.8 | 20.0 | 23.5 | 21.5 |
 
 † Per GazeD/UAGE evaluation protocol (reproduced Nonaka et al. numbers).
 
@@ -304,7 +305,6 @@ We also explored pose features (2D keypoints + 3D head/body positions) inspired 
 | Data augmentation | None | — | None | Horizontal flip |
 | Epochs to converge | ~50 | — | ~100 | **1-2** |
 | Trainable params | 9.5M | >10M | >20M | **770K** |
-| Time/epoch (V100) | ~3h | — | — | **~1h** |
 
 The three methods on the GAFA benchmark represent distinct design philosophies:
 
