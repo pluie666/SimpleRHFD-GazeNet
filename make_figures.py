@@ -306,8 +306,6 @@ def fig_training_curve():
     epochs = list(range(20))
     val_mae = [7.79, 7.72, 7.68, 7.72, 7.74, 7.73, 7.75, 7.71, 7.68, 7.70, 7.75, 7.85, 7.72, 7.68, 7.73, 7.69, 7.70, 7.70, 7.69, 7.78]
     direction_loss = [0.0088, 0.0125, 0.0100, 0.0133, 0.0114, 0.0097, 0.0194, 0.0674, 0.0094, 0.0088, 0.0087, 0.0136, 0.0116, 0.0099, 0.0135, 0.0153, 0.0113, 0.0113, 0.0117, 0.0111]
-    test_mae_annotations = {0: '—', 5: '21.48°', 18: '21.49°'}
-
     fig, ax1 = plt.subplots(1, 1, figsize=(10, 5))
     ax2 = ax1.twinx()
 
@@ -320,14 +318,15 @@ def fig_training_curve():
     ax1.tick_params(axis='y', labelcolor='#2ecc71')
     ax2.tick_params(axis='y', labelcolor='#e74c3c')
 
-    # Annotate test MAE
-    for ep, txt in test_mae_annotations.items():
-        ax1.annotate(f'Test: {txt}', xy=(ep, val_mae[ep]), xytext=(ep+1, val_mae[ep]+0.3),
-                     fontsize=9, color='#333', fontweight='bold')
+    # Annotate test MAE cleanly
+    for ep, txt in {5: 'Test MAE: 21.48°', 18: '21.49°'}.items():
+        ax1.annotate(txt, xy=(ep, val_mae[ep]), xytext=(ep-1.5, val_mae[ep]+0.15),
+                     fontsize=9, color='#333')
 
-    ax1.set_title('Training Stability of SimpleRHFD-GazeNet (20 epochs, Frozen HBNet)', fontsize=14, fontweight='bold')
+    ax1.set_title('Training Stability (20 epochs, Frozen HBNet)', fontsize=14, fontweight='bold')
     lines = [l1, l2]
     ax1.legend(lines, [l.get_label() for l in lines], loc='upper right')
+    ax1.set_ylim(7.4, 8.2)
     ax1.grid(alpha=0.3)
     fig.tight_layout()
     fig.savefig('figs/fig_training_curve.png')
