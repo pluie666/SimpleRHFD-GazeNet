@@ -191,8 +191,22 @@ We report 3D (full direction) and 2D (image-plane projection) MAE, split by fron
 | Method | 3D All (°) | 2D All (°) | 3D Front (°) | 3D Back (°) | Trainable Params |
 |--------|:---:|:---:|:---:|:---:|:---:|
 | GAFA [1] | 21.69 | 20.89 | 20.70 | 23.21 | 9.5M |
+| UAGE [26] | 22.2 | — | — | — | — |
+| GazeD [27] | **19.5** | 20.5 | — | — | — |
 | **SimpleRHFD (ours)** | **21.48** | **20.54** | **19.88** | 23.58 | **770K** |
-| *Δ* | *−0.21* | *−0.35* | *−0.82* | *+0.37* | *−91.9%* |
+| *Δ vs GAFA* | *−0.21* | *−0.35* | *−0.82* | *+0.37* | *−91.9%* |
+
+#### 4.2.2 Per-Scene Comparison
+
+| Method | Office | Living Room | Kitchen | Library | Courtyard | Overall |
+|--------|:---:|:---:|:---:|:---:|:---:|:---:|
+| GAFA [1]† | 14.4 | 25.1 | 20.4 | 19.8 | 25.4 | 21.7 |
+| GazeD [27] (AVG) | 15.8 | **19.3** | 18.2 | **17.6** | 25.3 | **19.5** |
+| GazeD [27] (Oracle) | **11.6** | 13.2 | **14.6** | 14.2 | **23.9** | **15.9** |
+
+† Per GazeD's evaluation protocol (reproduced Nonaka et al. numbers).
+
+Note: GAFA [1] reports front/back breakdown (Section 6.1.2). UAGE and GazeD do not provide this dimension, so front/back comparison is only against the GAFA baseline.
 
 ![Results Table](figs/fig_results_table.png)
 
