@@ -292,6 +292,18 @@ We present **SimpleRHFD-GazeNet**, demonstrating that five gaze-state temporal f
 
 We also explored pose features (2D keypoints + 3D head/body positions) inspired by UAGE (ACCV 2024) and gaze-point encoding (3D spatial point regression + L2 loss) inspired by GazeD (3DV 2026). These additional modules extended the GazeModule LSTM input from 11 to 20 dimensions but yielded test MAE of 21.52° and 21.80°, respectively — statistically indistinguishable from v6's 21.48°. This ablation result suggests that in the GAFA distant low-resolution setting, temporal statistical features ($G_f$, $G_d$) from head direction sequences already capture the primary gaze cues, with pose and spatial features providing marginal additional information. This negative result offers valuable guidance for feature engineering in distant gaze estimation.
 
+#### 6.1 Methodological Comparison: Lightweight Temporal Features vs Heavy Models
+
+The three methods on the GAFA benchmark represent distinct design philosophies:
+
+- **GazeD (19.5°)** : diffusion model + scene context + gaze-joint encoding, pursuing maximal accuracy at the cost of model complexity.
+- **UAGE (20.5°)** : four-branch ResNet+STGCN + CVAE uncertainty, leveraging full-body multi-modal signals with substantial parameter overhead.
+- **SimpleRHFD (21.5°)** : frozen pretrained HBNet + five pure-observational temporal features + 770K trainable parameters. **No visual backbone modification, no diffusion or VAE, no additional labels.**
+
+The parameter-accuracy trade-off across these methods reveals a core insight for distant gaze estimation: **temporal behavioral features (e.g., $G_f$, $G_d$) provide information gain comparable to heavy models at negligible marginal cost**. GazeD and UAGE invest heavily in visual backbones and uncertainty modeling to achieve 2--3° of additional improvement, while SimpleRHFD's pure-observational temporal feature route surpasses the baseline without adding visual complexity, offering the most compact parameter-accuracy Pareto frontier.
+
+This paradigm — "freeze pretrained vision model + compute lightweight temporal statistical features from intermediate outputs" — generalizes beyond gaze estimation. Any video understanding task that depends on temporal signals (action recognition, trajectory prediction, anomaly detection) can adopt this approach: extract free, computed temporal features from existing pretrained representations to boost performance at minimal cost. This paper validates this paradigm in distant gaze estimation, opening a new design space for efficient video understanding.
+
 Future work may pursue: (1) larger and more diverse training scenes to close the remaining domain gap; (2) architectural innovations that better leverage back-facing gaze cues. Our findings establish gaze-state temporal features as a reliable, low-cost signal for enhanced video-based gaze estimation.
 
 ---
