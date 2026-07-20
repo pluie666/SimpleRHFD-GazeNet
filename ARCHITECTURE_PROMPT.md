@@ -1,197 +1,153 @@
-# SimpleRHFD-GazeNet Architecture Diagram Prompt (English)
+# SimpleRHFD-GazeNet Architecture Diagram Prompt
+
+Generate a clean, professional neural network architecture diagram for a computer vision paper.
 
 ---
 
-## Overall Requirements
+## Overall Style
 
-Generate an academic paper-quality deep learning architecture diagram suitable for a CVPR/ICCV-style computer vision paper. The diagram should clearly show the complete inference pipeline of SimpleRHFD-GazeNet.
-
-**Style specifications:**
-- Pure white background, zero noise
-- All components as rounded-corner rectangles with 1.5px black borders
-- No shadows, no gradients, no 3D effects — strictly flat design
-- Font: Arial or Helvetica, sans-serif
-- Color scheme: low-saturation academic colors only (see per-stage specs below)
-- Overall size: fit single-column paper width (~8.5 cm wide × ~14 cm tall) or two-column width (~17 cm wide × ~10 cm tall)
-- Arrows: uniform gray filled downward arrows connecting stages top-to-bottom
+- Clean white background
+- Soft rounded rectangles with thin borders (1px, #999999)
+- Gentle, harmonious pastel colors — nothing neon or harsh
+- Sans-serif font (Arial / Helvetica)
+- Left-to-right or top-to-bottom flow with simple gray arrows
+- Leave space (gray dashed boxes) where sample images can be inserted later
 
 ---
 
-## Detailed Architecture (6 Stages, Top to Bottom)
+## Color Palette (Soft & Academic)
 
-### Stage 1: Input Layer (topmost)
-
-Rounded rectangle, background color `#ECF0F1` (light gray).
-
-**Title:** "Input: 7-frame Sequence"
-
-**Body (left-aligned, multiple lines):**
-- "Body Images I ∈ R^(B×7×3×256×192)"
-- "Head Bounding Box Masks M ∈ R^(B×7×1×256×192)"
-- "2D Body Velocity V ∈ R^(B×7×2)"
-
-Small caption below the box: "Preprocessed from GAFA surveillance footage"
+| Element | Color | Hex |
+|---------|-------|-----|
+| Input | Soft gray | `#F5F5F5` |
+| HBNet (Frozen) | Ice blue | `#E3F2FD` |
+| RHFD Features | Warm cream | `#FFF3E0` |
+| GazeModule | Soft green | `#E8F5E9` |
+| Output | Soft gray | `#F5F5F5` |
+| Borders | Medium gray | `#BDBDBD` |
+| Text | Dark gray | `#333333` |
+| Arrow | Gray | `#9E9E9E` |
 
 ---
 
-### Stage 2: HBNet — Frozen Feature Extractor
+## Layout: 4 Main Blocks (Left to Right)
 
-Rounded rectangle, background color `#D4E6F1` (pale blue).
-
-**Title:** "HBNet (Frozen 🔒, 8.7M pretrained)"
-
-**Body — four sub-modules, arranged horizontally or vertically:**
-
-Sub-module 2a: "Shared EfficientNet-B0 Stem" — extracts low-level shared features
-Sub-module 2b: "HeadNet (with Attention Mask)" — head direction branch
-Sub-module 2c: "BodyNet" — body direction branch
-Sub-module 2d: "TrajNet (2→32 MLP) + Temporal Alignment LSTM (2592→64)" — velocity encoding and temporal fusion
-
-**Output labels (at bottom of box):**
-- "head_dir ∈ S² [B×7×3]"
-- "body_dir ∈ S² [B×7×3]"
-- "κ_h, κ_b ∈ R⁺ [B×7×1]"
-
-**Right margin annotation in red:** "requires_grad = False"
+Arrange as a horizontal flow from left to right, or a 2×2 grid if space is tight.
 
 ---
 
-### Stage 3: Multi-Scale RHFD Feature Extraction (Non-parametric)
+### Block 1: Input
 
-Rounded rectangle, background color `#FDEBD0` (pale orange).
+Box title: **Input (7-frame sequence)**
 
-**Title:** "Multi-Scale RHFD Feature Extraction (0 learnable params)"
+Show 3 small gray placeholder boxes labeled "[Insert body image frames]" arranged horizontally as a film strip.
 
-**Body — upper half: five feature formulas (one per line), lower half: compression module.**
-
-**Upper half — raw features (5 types × 3 windows W=3,5,7 → 15 dim raw):**
-- "Gf: Fixation Frequency = (1/π)·arccos(h_{t-1}·h_t) — angular velocity"
-- "Gd: Gaze Density = mean cosine similarity in a W-frame sliding window"
-- "Ga: Head Stability = alignment of window frames to their mean direction"
-- "Gv: Head-Body Correlation = rolling Pearson r between |Gf| and ‖V‖"
-- "Gs: Spatial Entropy = mean pairwise cosine dissimilarity"
-
-**Lower half (inner sub-box):**
-"Multi-Scale Compression: MLP(15→32→8) + Sigmoid Gating → 8 dim final features"
-
-**Right margin annotation in red:** "torch.no_grad() + .detach()"
-
-**Small caption below the box:**
-"Prevents arccos gradient explosion: ∂arccos(x)/∂x = −1/√(1−x²) → ±∞ at |x|→1"
+Below the placeholder, list:
+```
+Body images (B×7×3×256×192)
+Head masks (B×7×1×256×192)
+Body velocity (B×7×2)
+```
 
 ---
 
-### Stage 4: Rotation Normalization
+### Block 2: Frozen HBNet — Head & Body Direction
 
-Small rounded rectangle, background color `#ECF0F1` (light gray).
+Box title: **HBNet 🔒 (Frozen, 8.7M)**
 
-**Title:** "Rotation Normalization"
+Two small placeholder boxes side-by-side:
+- Left: "[Insert head crop + gaze arrow]"
+- Right: "[Insert body image]"
 
-**Formula (centered):**
-"R = I + K + K²·(1−c)/(s²+ε)"
+Below:
+```
+EfficientNet-B0 → HeadNet + BodyNet
+Output: head_dir [3], body_dir [3], κ
+```
 
-**Small text below the formula:**
-"Align center frame (t=4) head_dir to (0,0,−1)⊤"
-"ε = 10⁻⁸: prevents division-by-zero NaN when s²=0 (key fix)"
-
----
-
-### Stage 5: Enhanced GazeModule — Core Predictor
-
-Rounded rectangle, background color `#D5F5E3` (pale green).
-
-**Title:** "Enhanced GazeModule (770K trainable params)"
-
-**Body — two-column layout:**
-
-**Left column — "LSTM Encoder":**
-- "Per-frame input: [κ_b·body_dir(3), κ_h·head_dir(3), RHFD_features(8)] = 11 dim"
-- "Bi-LSTM: 2 layers × 128 hidden (bidirectional)"
-- "Hidden states: 7 × 256 = 1792 dim"
-
-**Right column — "Prediction Heads":**
-- "Direction Head: FC(1792→64→21) → reshape to 7×3"
-- "  → L2 normalize to unit sphere S²"
-- "Kappa Head: FC(1792→64→7) → Softplus → κ ∈ R⁺"
-
-**Output labels (at bottom of box):**
-- "gaze_dir ∈ S² [B×7×3]"
-- "κ_g ∈ R⁺ [B×7×1]"
+Annotation below box in red: *Pretrained weights frozen — no fine-tuning*
 
 ---
 
-### Stage 6: Output Layer (bottommost)
+### Block 3: RHFD Temporal Features — Gaze Behavior
 
-Small rounded rectangle, background color `#ECF0F1` (light gray).
+Box title: **RHFD Temporal Features (0 params)**
 
-**Content (centered):**
-"Inverse Rotation: R⊤ · gaze_dir → World Coordinates"
-"→ Final 3D Gaze Directions for all 7 frames"
-"→ von Mises-Fisher concentration κ per frame"
+A simple table or list of the 5 features with brief descriptions:
 
----
+| Feature | What It Measures |
+|---------|-----------------|
+| Gf | How fast gaze direction changes (frame-to-frame angular speed) |
+| Gd | How concentrated gaze is (cosine similarity in a local window) |
+| Ga | How stable the head is (variance of direction) |
+| Gv | Whether head moves with body (correlation with walking) |
+| Gs | How spread out head directions are (spatial entropy) |
 
-## Sidebar: Key Design Decisions (Right side, dashed border)
-
-- 🔒 "Frozen HBNet: 8.7M → 770K trainable (−91.9%)"
-- "RHFD features: purely observational, zero extra labels"
-- "Gradient isolation on arccos: eliminates NaN"
-- "Multi-scale windows W=3,5,7 + learned per-frame gating"
-- "AdamW optimizer (weight_decay=5×10⁻³)"
-- "Cosine annealing LR schedule"
-- "Random horizontal flip augmentation"
-- "Train: 10 epochs, ~1 hour/epoch (NVIDIA V100 32GB)"
+Small note below: *Computed from head_dir & body_dv only — no extra labels*
 
 ---
 
-## Legend (Bottom-left corner, small font)
+### Block 4: GazeModule + Output
 
-- 🔒 "Frozen / Non-trainable"
-- Green boxes (#D5F5E3) = Trainable modules
-- Orange box (#FDEBD0) = Non-parametric computation
-- Blue box (#D4E6F1) = Pretrained backbone (frozen)
-- Gray boxes (#ECF0F1) = Input/Output/Transform
+Box title: **GazeModule LSTM (770K trainable)**
+
+Inside:
+```
+LSTM (11→128, 2-layer bidirectional)
+  ↓
+FC → 3D gaze direction + confidence (κ)
+```
+
+A small placeholder: "[Insert result image: body with gaze arrow overlay]"
+
+Output label: **Final 3D Gaze Direction (per frame) + uncertainty**
 
 ---
 
 ## Connecting Arrows
 
-Thick gray arrows (→) between each consecutive stage. Arrow annotations:
+Simple gray arrows (→) between blocks, with short text labels:
 
-| From → To | Arrow Label |
-|-----------|-------------|
-| Stage 1 → Stage 2 | "HBNet forward pass" |
-| Stage 2 → Stage 3 | "head_dir sequence" |
-| Stage 3 → Stage 4 | "concatenated features [B×T×(6+8)]" |
-| Stage 4 → Stage 5 | "[κ_b·b_dir, κ_h·h_dir, RHFD_features] ∈ R¹¹" |
-| Stage 5 → Stage 6 | "gaze_dir, κ" |
+- Block 1 → Block 2: "HBNet forward pass"
+- Block 2 → Block 3: "head_dir"
+- Block 3 → Block 4: "head_dir + body_dir + 5 RHFD features"
+- Block 4 → output: "gaze direction"
 
 ---
 
-## Technical Specifications
+## Additional Annotations (small text boxes below or beside the main flow)
 
-- **Color palette:**
-  - Light gray: `#ECF0F1`
-  - Pale blue: `#D4E6F1`
-  - Pale orange: `#FDEBD0`
-  - Pale green: `#D5F5E3`
-  - Border color: `#333333`
-  - Arrow color: `#888888`
-  - Red annotation text: `#C0392B`
+1. **Design:** "Only 770K trainable params (8% of original GAFA)"
+2. **Training:** "10 epochs, ~1h/epoch on V100"
+3. **Key trick:** "All RHFD features run under torch.no_grad() to prevent NaN"
 
-- **Typography:**
-  - Stage titles: 11pt bold
-  - Body text: 9pt regular
-  - Formulas: 9pt (Computer Modern or Latin Modern Math)
-  - Captions/annotations: 7.5pt italic
-  - Minimum font size: 8pt
+---
 
-- **Layout:**
-  - Vertical stack, equal spacing between stages
-  - Box corner radius: 6px
-  - Fixed border width: 1.5pt
-  - Arrow thickness: 2pt
+## Image Placeholders
 
-- **Output format:**
-  - Vector (SVG or PDF), resolution ≥ 300 DPI
-  - If PNG: minimum width 2000 pixels
+In the final PNG/SVG, leave clearly marked dashed rectangles where I will insert actual images:
+
+- **Placeholder A:** Inside Input block — 3 small filmstrip frames of cropped body images
+- **Placeholder B:** Inside HBNet block — 1 head crop with gaze arrow overlay  
+- **Placeholder C:** Inside Output block — 1 body image with predicted (red) vs ground truth (green) gaze arrows
+
+Each placeholder should have:
+- A dashed gray border
+- Centered text: "[Insert image]"
+- Light gray fill `#FAFAFA`
+
+---
+
+## Example of Desired Style
+
+Think of diagrams from papers like:
+- ResNet / DenseNet architecture figures (clean blocks + arrows)
+- CVPR/ICCV method overview figures (not overly detailed, visually clear)
+- The key is READABILITY over exhaustive detail — a reader should understand the pipeline in 10 seconds
+
+---
+
+## Output Format
+
+- SVG or PDF (vector) preferred, or high-res PNG (≥2000px wide)
+- Landscape orientation, ~16:9 or ~3:2 aspect ratio
