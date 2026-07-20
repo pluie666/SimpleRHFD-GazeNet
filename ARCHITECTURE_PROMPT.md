@@ -1,159 +1,197 @@
-# SimpleRHFD-GazeNet 架构图生成提示词（Gemini）
+# SimpleRHFD-GazeNet Architecture Diagram Prompt (English)
 
 ---
 
-## 总体要求
+## Overall Requirements
 
-生成一张学术论文级别的深度学习模型架构图，用于 CVPR/ICCV 风格的计算机视觉论文。图片应清晰展示 SimpleRHFD-GazeNet 的完整推理数据流。
+Generate an academic paper-quality deep learning architecture diagram suitable for a CVPR/ICCV-style computer vision paper. The diagram should clearly show the complete inference pipeline of SimpleRHFD-GazeNet.
 
-**风格要求：**
-- 白色背景，干净无噪点
-- 所有组件使用圆角矩形，黑色边框（1.5px）
-- 无阴影、无渐变、无3D效果——纯平面设计
-- 字体使用 Arial 或 Helvetica，无衬线
-- 颜色方案：仅使用低饱和度学术配色
-- 整体尺寸：适合论文单栏宽度（约 8.5cm 宽 × 14cm 高）或双栏宽度（约 17cm 宽 × 10cm 高）
-- 箭头统一使用灰色填充箭头（→），连接各阶段从上到下
+**Style specifications:**
+- Pure white background, zero noise
+- All components as rounded-corner rectangles with 1.5px black borders
+- No shadows, no gradients, no 3D effects — strictly flat design
+- Font: Arial or Helvetica, sans-serif
+- Color scheme: low-saturation academic colors only (see per-stage specs below)
+- Overall size: fit single-column paper width (~8.5 cm wide × ~14 cm tall) or two-column width (~17 cm wide × ~10 cm tall)
+- Arrows: uniform gray filled downward arrows connecting stages top-to-bottom
 
-## 详细架构描述
+---
 
-### 阶段 1：输入层（最顶部）
+## Detailed Architecture (6 Stages, Top to Bottom)
 
-一个圆角矩形框，颜色为浅灰色 `#ECF0F1`，内容如下：
+### Stage 1: Input Layer (topmost)
 
-标题："Input: 7-frame Sequence"
-正文（多行，左对齐）：
-- "Body Image `I ∈ R^(B×7×3×256×192)`"
-- "Head Bounding Box Mask `M ∈ R^(B×7×1×256×192)`"
-- "Body Velocity `V ∈ R^(B×7×2)`"
+Rounded rectangle, background color `#ECF0F1` (light gray).
 
-框下方标注小字："Preprocessed from GAFA surveillance footage"
+**Title:** "Input: 7-frame Sequence"
 
-### 阶段 2：HBNet（冻结特征提取器）
+**Body (left-aligned, multiple lines):**
+- "Body Images I ∈ R^(B×7×3×256×192)"
+- "Head Bounding Box Masks M ∈ R^(B×7×1×256×192)"
+- "2D Body Velocity V ∈ R^(B×7×2)"
 
-一个圆角矩形框，颜色为浅蓝色 `#D4E6F1`，内容如下：
+Small caption below the box: "Preprocessed from GAFA surveillance footage"
 
-标题："HBNet (Frozen 🔒, 8.7M pretrained params)" 
+---
 
-正文分四个子模块（每个用更浅的小矩形表示，水平排列或垂直堆叠）：
+### Stage 2: HBNet — Frozen Feature Extractor
 
-子模块 2a："Shared EfficientNet-B0 Stem" — 提取共享低层特征
-子模块 2b："HeadNet (w/ Attention Mask)" — 头部方向分支
-子模块 2c："BodyNet" — 身体方向分支  
-子模块 2d："TrajNet (2→32 MLP) + Temporal LSTM (2592→64)" — 速度编码+时序对齐
+Rounded rectangle, background color `#D4E6F1` (pale blue).
 
-输出标注（框底部）：
+**Title:** "HBNet (Frozen 🔒, 8.7M pretrained)"
+
+**Body — four sub-modules, arranged horizontally or vertically:**
+
+Sub-module 2a: "Shared EfficientNet-B0 Stem" — extracts low-level shared features
+Sub-module 2b: "HeadNet (with Attention Mask)" — head direction branch
+Sub-module 2c: "BodyNet" — body direction branch
+Sub-module 2d: "TrajNet (2→32 MLP) + Temporal Alignment LSTM (2592→64)" — velocity encoding and temporal fusion
+
+**Output labels (at bottom of box):**
 - "head_dir ∈ S² [B×7×3]"
 - "body_dir ∈ S² [B×7×3]"
 - "κ_h, κ_b ∈ R⁺ [B×7×1]"
 
-框右侧用红色文字标注："requires_grad = False"，表示所有参数冻结
+**Right margin annotation in red:** "requires_grad = False"
 
-### 阶段 3：RHFD 特征提取（无参数计算层）
+---
 
-一个圆角矩形框，颜色为浅橙色 `#FDEBD0`，内容如下：
+### Stage 3: Multi-Scale RHFD Feature Extraction (Non-parametric)
 
-标题："Multi-Scale RHFD Feature Extraction (0 learnable params)"
+Rounded rectangle, background color `#FDEBD0` (pale orange).
 
-框内分成上下两部分——上方是五个特征的计算公式（每行一个），下方是融合模块：
+**Title:** "Multi-Scale RHFD Feature Extraction (0 learnable params)"
 
-第一部分：5 个特征 × 3 个窗口（W=3,5,7）
-- "Gf: Fixation Frequency = (1/π) · arccos(h_{t-1} · h_t)"
-- "Gd: Gaze Density = mean cosine similarity in window"
-- "Ga: Head Stability = alignment to window mean direction"
-- "Gv: Head-Body Correlation = rolling Pearson r(|Gf|, ‖V‖)"
-- "Gs: Spatial Entropy = mean pairwise dissimilarity"
+**Body — upper half: five feature formulas (one per line), lower half: compression module.**
 
-第二部分（下方子框）：
-标题："Multi-Scale Fusion → 15 dim"
-内容："MLP(15→32→8) + Sigmoid Gate — Per-frame learned feature weighting"
+**Upper half — raw features (5 types × 3 windows W=3,5,7 → 15 dim raw):**
+- "Gf: Fixation Frequency = (1/π)·arccos(h_{t-1}·h_t) — angular velocity"
+- "Gd: Gaze Density = mean cosine similarity in a W-frame sliding window"
+- "Ga: Head Stability = alignment of window frames to their mean direction"
+- "Gv: Head-Body Correlation = rolling Pearson r between |Gf| and ‖V‖"
+- "Gs: Spatial Entropy = mean pairwise cosine dissimilarity"
 
-框右侧用红色文字标注框："torch.no_grad() + .detach()"
+**Lower half (inner sub-box):**
+"Multi-Scale Compression: MLP(15→32→8) + Sigmoid Gating → 8 dim final features"
 
-框下方标注："Prevents arccos gradient explosion (∂/∂x = −1/√(1−x²) → ±∞ at boundaries)"
+**Right margin annotation in red:** "torch.no_grad() + .detach()"
 
-### 阶段 4：旋转归一化
+**Small caption below the box:**
+"Prevents arccos gradient explosion: ∂arccos(x)/∂x = −1/√(1−x²) → ±∞ at |x|→1"
 
-一个小型圆角矩形框，颜色为浅灰色 `#ECF0F1`，内容如下：
+---
 
-标题："Rotation Normalization (Rodrigues Formula)"
+### Stage 4: Rotation Normalization
 
-公式居中显示：
-"R = I + K + K² · (1−c)/(s²+ε)"
+Small rounded rectangle, background color `#ECF0F1` (light gray).
 
-说明文字：
-"Align center frame head_dir to (0,0,−1)⊤"
-"ε = 10⁻⁸ prevents s²=0 NaN (key fix)"
+**Title:** "Rotation Normalization"
 
-### 阶段 5：增强 GazeModule（核心预测模块）
+**Formula (centered):**
+"R = I + K + K²·(1−c)/(s²+ε)"
 
-一个圆角矩形框，颜色为浅绿色 `#D5F5E3`，内容如下：
+**Small text below the formula:**
+"Align center frame (t=4) head_dir to (0,0,−1)⊤"
+"ε = 10⁻⁸: prevents division-by-zero NaN when s²=0 (key fix)"
 
-标题："Enhanced GazeModule (770K trainable params)"
+---
 
-框内分成两列：
+### Stage 5: Enhanced GazeModule — Core Predictor
 
-**左列 — LSTM Encoder：**
-- "Input per frame: [κ_b·body_dir(3), κ_h·head_dir(3), RHFD(8)] = 11 dim"
+Rounded rectangle, background color `#D5F5E3` (pale green).
+
+**Title:** "Enhanced GazeModule (770K trainable params)"
+
+**Body — two-column layout:**
+
+**Left column — "LSTM Encoder":**
+- "Per-frame input: [κ_b·body_dir(3), κ_h·head_dir(3), RHFD_features(8)] = 11 dim"
 - "Bi-LSTM: 2 layers × 128 hidden (bidirectional)"
-- "→ LSTM hidden states: 7 × 256 = 1792 dim"
+- "Hidden states: 7 × 256 = 1792 dim"
 
-**右列 — Prediction Heads：**
-- "Direction Head: FC(1792→64→21) → reshape(7×3)"
+**Right column — "Prediction Heads":**
+- "Direction Head: FC(1792→64→21) → reshape to 7×3"
 - "  → L2 normalize to unit sphere S²"
-- "Kappa Head: FC(1792→64→7) → Softplus → R⁺"
+- "Kappa Head: FC(1792→64→7) → Softplus → κ ∈ R⁺"
 
-框下方标注输出：
-- "gaze_dir ∈ S² [B×7×3]"  
+**Output labels (at bottom of box):**
+- "gaze_dir ∈ S² [B×7×3]"
 - "κ_g ∈ R⁺ [B×7×1]"
 
-### 阶段 6：输出层（最底部）
+---
 
-一个小型圆角矩形框，内容如下：
+### Stage 6: Output Layer (bottommost)
 
-"t = Inverse Rotation: R⊤ · gaze_dir → World Coordinates"
-"→ Final 3D Gaze Direction (7 frames)"
+Small rounded rectangle, background color `#ECF0F1` (light gray).
 
-### 右侧标注栏（关键设计决策）
+**Content (centered):**
+"Inverse Rotation: R⊤ · gaze_dir → World Coordinates"
+"→ Final 3D Gaze Directions for all 7 frames"
+"→ von Mises-Fisher concentration κ per frame"
 
-在架构图右侧添加一个竖直的文字注释栏，使用虚线框，内容：
+---
 
-**"Key Design Decisions"**
-1. "Frozen HBNet: 8.7M→770K (−92%)"
-2. "Gradient isolation: prevents NaN"
-3. "5 RHFD temporal features: purely observational, no extra labels"
-4. "Multi-scale W=3,5,7 + learned gating"
-5. "AdamW (wd=5e-3) + Cosine LR"
-6. "Horizontal flip augmentation"
-7. "Train: 10 epochs, ~1h/epoch (V100)"
+## Sidebar: Key Design Decisions (Right side, dashed border)
 
-### 图例（左下角小字）
+- 🔒 "Frozen HBNet: 8.7M → 770K trainable (−91.9%)"
+- "RHFD features: purely observational, zero extra labels"
+- "Gradient isolation on arccos: eliminates NaN"
+- "Multi-scale windows W=3,5,7 + learned per-frame gating"
+- "AdamW optimizer (weight_decay=5×10⁻³)"
+- "Cosine annealing LR schedule"
+- "Random horizontal flip augmentation"
+- "Train: 10 epochs, ~1 hour/epoch (NVIDIA V100 32GB)"
 
-- "🔒 = Frozen parameters"
-- "Green boxes = Trainable modules"  
-- "Orange box = Non-parametric computation"
-- "Blue box = Pretrained backbone"
+---
 
-### 连接箭头
+## Legend (Bottom-left corner, small font)
 
-每两个连续阶段之间用灰色粗箭头（→）连接。箭头旁可加小型文本标注，例如：
-- 阶段1→2："HBNet forward pass"
-- 阶段2→3："head_dir, body_dv"
-- 阶段3→4："concatenated features"
-- 阶段4→5："[b·κ, h·κ, RHFD] ∈ R¹¹"
-- 阶段5→6："gaze_dir, κ"
+- 🔒 "Frozen / Non-trainable"
+- Green boxes (#D5F5E3) = Trainable modules
+- Orange box (#FDEBD0) = Non-parametric computation
+- Blue box (#D4E6F1) = Pretrained backbone (frozen)
+- Gray boxes (#ECF0F1) = Input/Output/Transform
 
-## 版面要求
+---
 
-- 纵向布局（从上到下），宽度适合 A4/Letter 双栏
-- 各阶段框之间等距分布
-- 所有文本清晰可读，最小字号 ≥ 8pt
-- 公式使用数学符号字体（如 Latin Modern Math 或 Computer Modern）
-- 边框粗细一致（1.5pt），深灰色 (#333333)
-- 不使用任何渐变、阴影、3D 效果
-- 框内文本左对齐或居中，保持整洁
+## Connecting Arrows
 
-## 输出格式
+Thick gray arrows (→) between each consecutive stage. Arrow annotations:
 
-- 矢量图（SVG 或 PDF），分辨率 ≥ 300 DPI
-- 如果生成 PNG，宽度至少 2000px
+| From → To | Arrow Label |
+|-----------|-------------|
+| Stage 1 → Stage 2 | "HBNet forward pass" |
+| Stage 2 → Stage 3 | "head_dir sequence" |
+| Stage 3 → Stage 4 | "concatenated features [B×T×(6+8)]" |
+| Stage 4 → Stage 5 | "[κ_b·b_dir, κ_h·h_dir, RHFD_features] ∈ R¹¹" |
+| Stage 5 → Stage 6 | "gaze_dir, κ" |
+
+---
+
+## Technical Specifications
+
+- **Color palette:**
+  - Light gray: `#ECF0F1`
+  - Pale blue: `#D4E6F1`
+  - Pale orange: `#FDEBD0`
+  - Pale green: `#D5F5E3`
+  - Border color: `#333333`
+  - Arrow color: `#888888`
+  - Red annotation text: `#C0392B`
+
+- **Typography:**
+  - Stage titles: 11pt bold
+  - Body text: 9pt regular
+  - Formulas: 9pt (Computer Modern or Latin Modern Math)
+  - Captions/annotations: 7.5pt italic
+  - Minimum font size: 8pt
+
+- **Layout:**
+  - Vertical stack, equal spacing between stages
+  - Box corner radius: 6px
+  - Fixed border width: 1.5pt
+  - Arrow thickness: 2pt
+
+- **Output format:**
+  - Vector (SVG or PDF), resolution ≥ 300 DPI
+  - If PNG: minimum width 2000 pixels
