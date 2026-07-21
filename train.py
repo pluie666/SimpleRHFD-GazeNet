@@ -84,9 +84,8 @@ def train(opt):
         benchmark=True,
         min_epochs=opt.epoch,
         max_epochs=opt.epoch,
-        accelerator="gpu",
-        devices=opt.gpus,
-        strategy="auto",
+        gpus=opt.gpus,
+        strategy="ddp",
         precision=16,
     )
 

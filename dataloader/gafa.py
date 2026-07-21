@@ -81,10 +81,10 @@ class GazeSeqDataset(Dataset):
         # Horizontal flip augmentation (consistent across all frames)
         if augment and np.random.rand() > 0.5:
             image = image.flip(-1)  # flip width dimension
-            head_dir = head_dir * np.array([-1., 1., 1.], dtype=np.float32)
-            body_dir = body_dir * np.array([-1., 1., 1.], dtype=np.float32)
-            gaze_dir = gaze_dir * np.array([-1., 1., 1.], dtype=np.float32)
-            body_dv  = body_dv * np.array([-1., 1.], dtype=np.float32)
+            head_dir[:, 0] *= -1
+            body_dir[:, 0] *= -1
+            gaze_dir[:, 0] *= -1
+            body_dv[:, 0] *= -1
             head_bb[:, 0] = 1.0 - head_bb[:, 0] - head_bb[:, 2]  # mirror x
             # head_mask will be created from mirrored head_bb below
 
