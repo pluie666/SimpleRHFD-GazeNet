@@ -13,7 +13,7 @@ parser.add_argument('--batch_size', type=int, default=32)
 opt = parser.parse_args()
 
 model = SimpleRHFDGazeNetV7(n_frames=7).cuda()
-ckpt = torch.load(opt.checkpoint, map_location='cuda')
+ckpt = torch.load(opt.checkpoint, map_location='cuda', weights_only=False)
 model.load_state_dict(ckpt['state_dict'], strict=False)
 model.eval()
 

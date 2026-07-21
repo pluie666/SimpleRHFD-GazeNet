@@ -41,7 +41,7 @@ def main():
     # Load model
     model = SimpleRHFDGazeNet(n_frames=opt.n_frames)
     model.load_pretrained_hbnet(opt.weights)
-    ckpt = torch.load(opt.checkpoint, map_location=torch.device("cpu"))
+    ckpt = torch.load(opt.checkpoint, map_location=torch.device("cpu"), weights_only=False)
     model.load_state_dict(ckpt['state_dict'], strict=False)
     print(f"Model loaded. Trainable params: "
           f"{sum(p.numel() for p in model.parameters() if p.requires_grad):,}")

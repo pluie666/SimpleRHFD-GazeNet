@@ -30,7 +30,7 @@ class SimpleRHFDGazeNetV7(pl.LightningModule):
         self.automatic_optimization = False
 
     def load_pretrained_hbnet(self, path, map_location='cpu', freeze=True):
-        s = torch.load(path, map_location=map_location)
+        s = torch.load(path, map_location=map_location, weights_only=False)
         if 'state_dict' in s: s = s['state_dict']
         hb = {k[6:]: v for k, v in s.items() if k.startswith('hbnet.')}
         self.hbnet.load_state_dict(hb, strict=True)

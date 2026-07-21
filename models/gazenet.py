@@ -394,7 +394,7 @@ class GazeNet(pl.LightningModule):
             checkpoint_path: path to .pth checkpoint
             map_location:    device to load weights to
         """
-        state = torch.load(checkpoint_path, map_location=map_location)
+        state = torch.load(checkpoint_path, map_location=map_location, weights_only=False)
         if 'state_dict' in state:
             state = state['state_dict']
 
@@ -723,7 +723,7 @@ class SimpleRHFDGazeNet(pl.LightningModule):
     def load_pretrained_hbnet(self, checkpoint_path: str, map_location: str = 'cpu',
                               freeze: bool = False):
         """Load HBNet weights from original GAFA checkpoint."""
-        state = torch.load(checkpoint_path, map_location=map_location)
+        state = torch.load(checkpoint_path, map_location=map_location, weights_only=False)
         if 'state_dict' in state:
             state = state['state_dict']
         hbnet_state = {}
