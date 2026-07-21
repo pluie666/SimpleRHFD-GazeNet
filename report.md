@@ -24,7 +24,7 @@ We demonstrate that these features can be computed entirely from HBNet's existin
 
 3. **Multi-scale temporal features with gating and strong regularisation.** Computing the five RHFD features at three temporal windows ($W = 3, 5, 7$) and compressing the 15 resulting dimensions through a learnable MLP with per-frame Sigmoid gating provides marginal gains. More importantly, combining horizontal-flip augmentation with AdamW optimiser (weight decay $5 \times 10^{-3}$) and cosine annealing halves the validation-test generalisation gap from 13.8° to 6.7° without sacrificing test accuracy.
 
-On the GAFA benchmark, SimpleRHFD-GazeNet achieves a 3D mean angular error of **21.48°**, an improvement of 0.21° over the original GAFA model and 0.72° over UAGE (22.2°). Frontal gaze accuracy improves by **0.82°** (19.88° versus 20.70°). These gains are achieved with only 770K trainable parameters — 8.1% of the original model.
+On the GAFA benchmark, SimpleRHFD-GazeNet achieves a 3D mean angular error of **21.48°**, an improvement of 0.21° over the original GAFA model (21.69°). While UAGE (20.5°) and GazeD (19.5°) achieve higher raw accuracy, our method uses only 770K trainable parameters — approximately 8% of the original model and a fraction of these heavier architectures — and converges within 1–2 epochs versus 50–100. Frontal gaze accuracy improves by **0.82°** (19.88° versus 20.70°). These gains are achieved with only 770K trainable parameters — 8.1% of the original model.
 
 ---
 
