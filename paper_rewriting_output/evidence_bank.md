@@ -1,4 +1,4 @@
-# Evidence Bank — SimpleRHFD-GazeNet
+# Evidence Bank — GazeStateNet
 
 | Claim | Evidence Type | Source | Strength |
 |-------|-------------|--------|:---:|

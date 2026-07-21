@@ -1,4 +1,4 @@
-# Style Profile — SimpleRHFD-GazeNet
+# Style Profile — GazeStateNet
 
 Derived from analysis of GAFA (CVPR 2022), UAGE (ACCV 2024), and GazeD (3DV 2026) papers.
 

@@ -1,4 +1,4 @@
-# Research Dossier — SimpleRHFD-GazeNet
+# Research Dossier — GazeStateNet
 
 ## Venue: Computer Vision Conference (CVPR/ICCV/ECCV Style)
 
@@ -12,7 +12,7 @@
 | SOTA comparison | ✅ | GAFA (21.69°), UAGE (20.5°), GazeD (19.5°) |
 | Ablation study | ✅ | 7 configurations (v1-v7b) |
 | Per-scene breakdown | ✅ | Office/LR/Kitchen/Library/Courtyard |
-| Code release | ✅ | github.com/pluie666/SimpleRHFD-GazeNet |
+| Code release | ✅ | github.com/pluie666/GazeStateNet |
 
 ### Review Criteria (CVPR Standards)
 

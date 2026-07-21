@@ -1,4 +1,4 @@
-# Exemplar Learning Dossier — SimpleRHFD-GazeNet
+# Exemplar Learning Dossier — GazeStateNet
 
 ## Exemplar Inventory (Pro Tier: 6 + 6 = 12 targets)
 

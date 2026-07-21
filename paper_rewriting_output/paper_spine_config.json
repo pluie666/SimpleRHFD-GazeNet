@@ -3,7 +3,7 @@
   "scene": "conference",
   "tier": "pro",
   "output_language": "en",
-  "target_name": "SimpleRHFD-GazeNet: Enhancing Dynamic 3D Gaze Estimation via Gaze-State Temporal Features",
+  "target_name": "GazeStateNet: Enhancing Dynamic 3D Gaze Estimation via Gaze-State Temporal Features",
   "materials_dir": ".",
   "draft_path": "report.md",
   "user_motivation": "GAFA (CVPR 2022) achieves 21.69deg 3D MAE on distant gaze estimation. UAGE (20.5deg) and GazeD (19.5deg) improve via heavy architectures (CVAE, diffusion). Our contribution: five purely-observational temporal features (Gf, Gd, Ga, Gv, Gs) computed from existing HBNet outputs with zero extra labels, combined with frozen HBNet (770K trainable params), achieving 21.48deg while using 8% of original parameters. Key engineering: arccos gradient isolation (NaN fix), frozen backbone (3deg improvement), multi-scale windows + gating + strong regularization (gap 13.8deg to 6.7deg).",

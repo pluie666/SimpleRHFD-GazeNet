@@ -1,5 +1,5 @@
 """
-Evaluate SimpleRHFD-GazeNet on the GAFA test set.
+Evaluate GazeStateNet on the GAFA test set.
 
 Usage:
     python eval.py --checkpoint output_v6/.../checkpoint.ckpt --gpus 1
@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 
 from dataloader.gafa import create_gafa_dataset
-from models.gazenet import SimpleRHFDGazeNet
+from models.gazenet import GazeStateNet
 
 # GAFA test set (6 held-out scenes)
 test_exp_names = [
@@ -39,7 +39,7 @@ def main():
     opt = parser.parse_args()
 
     # Load model
-    model = SimpleRHFDGazeNet(n_frames=opt.n_frames)
+    model = GazeStateNet(n_frames=opt.n_frames)
     model.load_pretrained_hbnet(opt.weights)
     ckpt = torch.load(opt.checkpoint, map_location=torch.device("cpu"), weights_only=False)
     model.load_state_dict(ckpt['state_dict'], strict=False)

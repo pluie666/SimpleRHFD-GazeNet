@@ -1,4 +1,4 @@
-# Confirmed Contribution — SimpleRHFD-GazeNet
+# Confirmed Contribution — GazeStateNet
 
 > PaperSpine V4 Gate 4: No writing proceeds beyond this point without confirmed contribution.
 
@@ -77,4 +77,4 @@
 
 ## 5. The One-Sentence Contribution
 
-> SimpleRHFD-GazeNet shows that five gradient-isolated, purely observational gaze-state temporal features — computed from a frozen pretrained backbone — can improve GAFA 3D gaze estimation to 21.48° MAE using only 770K trainable parameters, establishing a new lightweight paradigm for video-based behavioural feature engineering.
+> GazeStateNet shows that five gradient-isolated, purely observational gaze-state temporal features — computed from a frozen pretrained backbone — can improve GAFA 3D gaze estimation to 21.48° MAE using only 770K trainable parameters, establishing a new lightweight paradigm for video-based behavioural feature engineering.

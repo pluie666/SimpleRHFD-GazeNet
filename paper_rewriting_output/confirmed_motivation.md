@@ -1,4 +1,4 @@
-# Confirmed Motivation — SimpleRHFD-GazeNet
+# Confirmed Motivation — GazeStateNet
 
 > PaperSpine Gate 4: User-confirmed controlling motivation. This document locks the paper's narrative direction.
 
@@ -6,7 +6,7 @@
 
 ## One-Sentence Core Argument
 
-> SimpleRHFD-GazeNet demonstrates that five lightweight, purely observational gaze-state temporal features — computed from a frozen pretrained backbone at zero annotation cost — can improve GAFA 3D gaze estimation while using only 8% of the original trainable parameters, establishing a new efficiency-first paradigm for video-based behavioural feature engineering.
+> GazeStateNet demonstrates that five lightweight, purely observational gaze-state temporal features — computed from a frozen pretrained backbone at zero annotation cost — can improve GAFA 3D gaze estimation while using only 8% of the original trainable parameters, establishing a new efficiency-first paradigm for video-based behavioural feature engineering.
 
 ## What This Paper Is
 

@@ -1,4 +1,4 @@
-# SimpleRHFD-GazeNet Architecture Diagram Prompt
+# GazeStateNet Architecture Diagram Prompt
 
 Generate a clean, professional neural network architecture diagram for a computer vision paper.
 

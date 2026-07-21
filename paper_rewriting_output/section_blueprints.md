@@ -1,4 +1,4 @@
-# Section Blueprints — SimpleRHFD-GazeNet
+# Section Blueprints — GazeStateNet
 
 ## Abstract
 - **Function**: Hook + method highlight + key numbers + significance

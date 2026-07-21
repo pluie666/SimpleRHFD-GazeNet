@@ -1,7 +1,7 @@
-"""Test SimpleRHFDGazeNetV7 on GAFA test set."""
+"""Test GazeStateNetV7 on GAFA test set."""
 import sys, torch, numpy as np
 sys.path.insert(0, '.')
-from models.gazenet_v7 import SimpleRHFDGazeNetV7
+from models.gazenet_v7 import GazeStateNetV7
 from dataloader.gafa import create_gafa_dataset
 from torch.utils.data import DataLoader
 from models.utils import compute_mae
@@ -12,7 +12,7 @@ parser.add_argument('--checkpoint', type=str, required=True)
 parser.add_argument('--batch_size', type=int, default=32)
 opt = parser.parse_args()
 
-model = SimpleRHFDGazeNetV7(n_frames=7).cuda()
+model = GazeStateNetV7(n_frames=7).cuda()
 ckpt = torch.load(opt.checkpoint, map_location='cuda', weights_only=False)
 model.load_state_dict(ckpt['state_dict'], strict=False)
 model.eval()

@@ -1,4 +1,4 @@
-"""SimpleRHFDGazeNet V7: GazeD gaze-point + UAGE pose features + RHFD temporal features."""
+"""GazeStateNet V7: GazeD gaze-point + UAGE pose features + RHFD temporal features."""
 import numpy as np, torch, torch.nn as nn, torch.nn.functional as F, pytorch_lightning as pl
 from models.hbnet import HBNet
 from models.utils import get_rotation, compute_mae
@@ -7,7 +7,7 @@ from models.rhfd_features import MultiScaleRHFDExtractor
 from models.pose_features import PoseFeatureExtractor
 
 
-class SimpleRHFDGazeNetV7(pl.LightningModule):
+class GazeStateNetV7(pl.LightningModule):
     """V7: GazeD gaze-point head + UAGE pose features + RHFD temporal features.
     LSTM input: body_dir(3)+head_dir(3)+rhfd(8)+pose(6)=20 dim."""
 

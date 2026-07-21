@@ -19,7 +19,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from models.gazenet import SimpleRHFDGazeNet
+from models.gazenet import GazeStateNet
 from dataloader.gafa import create_gafa_dataset
 
 plt.rcParams.update({
@@ -54,7 +54,7 @@ def main():
     os.makedirs('figs', exist_ok=True)
 
     # Load model
-    model = SimpleRHFDGazeNet(n_frames=7).cuda()
+    model = GazeStateNet(n_frames=7).cuda()
     if opt.checkpoint:
         ckpt = torch.load(opt.checkpoint, map_location='cuda', weights_only=False)
         model.load_state_dict(ckpt['state_dict'], strict=False)
@@ -143,7 +143,7 @@ def main():
         Patch(facecolor='#3498db', label='Head Direction'),
     ]
 
-    fig.suptitle('Per-Sample Gaze Estimation: Ground Truth vs SimpleRHFD-GazeNet',
+    fig.suptitle('Per-Sample Gaze Estimation: Ground Truth vs GazeStateNet',
                  fontsize=15, fontweight='bold', y=0.98)
 
     # Tight layout first, then add legend above

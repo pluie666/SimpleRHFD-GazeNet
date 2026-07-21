@@ -33,7 +33,7 @@
 
 ### §4.2.2 Per-Scene Comparison
 
-| Scene | SimpleRHFD | vs GAFA | vs UAGE | vs GazeD | Contribution |
+| Scene | GazeStateNet | vs GAFA | vs UAGE | vs GazeD | Contribution |
 |-------|:---:|:---:|:---:|:---:|------|
 | Office | 14.3° | −0.1° ✅ | −1.0° ✅ | −1.5° ✅ | C1, C5 |
 | Living Room | 24.7° | −0.4° ✅ | +1.2° ❌ | +5.4° ❌ | C1 (partial) |

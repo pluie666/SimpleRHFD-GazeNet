@@ -1,5 +1,5 @@
 """
-Generate publication-quality figures for SimpleRHFD-GazeNet paper.
+Generate publication-quality figures for GazeStateNet paper.
 
 Outputs (saved to figs/ directory):
   1. fig_architecture.png       — model architecture diagram
@@ -27,7 +27,7 @@ from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 from matplotlib.colors import LinearSegmentedColormap
 import cv2
 
-from models.gazenet import SimpleRHFDGazeNet
+from models.gazenet import GazeStateNet
 from dataloader.gafa import create_gafa_dataset
 from torch.utils.data import DataLoader
 from models.utils import compute_mae
@@ -66,7 +66,7 @@ def fig_architecture():
         ax.annotate('', xy=(5, y+0.15), xytext=(5, y-0.15),
                     arrowprops=dict(arrowstyle='->', lw=2, color='#555'))
 
-    ax.text(5, 13.6, 'SimpleRHFD-GazeNet Architecture', ha='center', fontsize=16, fontweight='bold')
+    ax.text(5, 13.6, 'GazeStateNet Architecture', ha='center', fontsize=16, fontweight='bold')
     ax.text(9.5, 0.3, 'Only 770K trainable params (91.9% reduction)', ha='right', fontsize=9, color='#888')
     fig.savefig('figs/fig_architecture.png')
     plt.close()
@@ -167,7 +167,7 @@ def fig_error_dist(model):
         ax.set_ylabel('Count')
         ax.legend()
 
-    fig.suptitle('Error Distribution of SimpleRHFD-GazeNet on GAFA Test Set', fontsize=14, fontweight='bold')
+    fig.suptitle('Error Distribution of GazeStateNet on GAFA Test Set', fontsize=14, fontweight='bold')
     fig.tight_layout()
     fig.savefig('figs/fig_error_dist.png')
     plt.close()
@@ -284,7 +284,7 @@ def fig_ablation():
     ax.set_xticks(x); ax.set_xticklabels(versions, fontsize=10)
     ax.set_ylabel('3D Mean Angular Error (°)', fontsize=12)
     ax.set_ylim(18, 27)
-    ax.set_title('Ablation Study: SimpleRHFD-GazeNet Configuration Variants', fontsize=14, fontweight='bold')
+    ax.set_title('Ablation Study: GazeStateNet Configuration Variants', fontsize=14, fontweight='bold')
     ax.legend(loc='upper right')
     ax.grid(axis='y', alpha=0.3, zorder=0)
 
@@ -344,7 +344,7 @@ def fig_results_table():
     headers = ['Method', '3D All', '2D All', '3D Front', '3D Back', 'Params']
     data = [
         ['GAFA (CVPR 2022)', '21.69°', '20.89°', '20.70°', '23.21°', '9.5M'],
-        ['SimpleRHFD (Ours)', r'$\mathbf{21.48°}$', r'$\mathbf{20.54°}$', r'$\mathbf{19.88°}$', '23.58°', r'$\mathbf{770K}$'],
+        ['GazeStateNet (Ours)', r'$\mathbf{21.48°}$', r'$\mathbf{20.54°}$', r'$\mathbf{19.88°}$', '23.58°', r'$\mathbf{770K}$'],
         ['Improvement', '-0.21°', '-0.35°', '-0.82°', '+0.37°', '-91.9%'],
     ]
 
@@ -368,7 +368,7 @@ def fig_results_table():
             else:
                 table[i+1, j].set_facecolor('#f8f9fa')
 
-    ax.set_title('GAFA Test Set: SimpleRHFD-GazeNet vs Original', fontsize=14, fontweight='bold', pad=20)
+    ax.set_title('GAFA Test Set: GazeStateNet vs Original', fontsize=14, fontweight='bold', pad=20)
     fig.tight_layout()
     fig.savefig('figs/fig_results_table.png')
     plt.close()
@@ -448,7 +448,7 @@ def main():
 
     # Figures that need a trained model
     if not opt.skip_model:
-        model = SimpleRHFDGazeNet(n_frames=7).cuda()
+        model = GazeStateNet(n_frames=7).cuda()
         if opt.checkpoint:
             ckpt = torch.load(opt.checkpoint, map_location='cuda', weights_only=False)
             model.load_state_dict(ckpt['state_dict'], strict=False)

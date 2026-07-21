@@ -1,4 +1,4 @@
-# Rewrite Matrix — SimpleRHFD-GazeNet
+# Rewrite Matrix — GazeStateNet
 
 Maps original text → planned changes → final state.
 

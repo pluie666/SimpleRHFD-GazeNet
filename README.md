@@ -1,10 +1,10 @@
-# SimpleRHFD-GazeNet: Enhancing 3D Gaze Estimation via Gaze-State Temporal Features
+# GazeStateNet: Enhancing 3D Gaze Estimation via Gaze-State Temporal Features
 
-This repository provides an enhanced implementation of dynamic 3D gaze estimation, built upon the [GAFA framework](https://openaccess.thecvf.com/content/CVPR2022/html/Nonaka_Dynamic_3D_Gaze_From_Afar_Deep_Gaze_Estimation_From_Temporal_CVPR_2022_paper.html) (Nonaka et al., CVPR 2022). **SimpleRHFD-GazeNet** integrates five gaze-state temporal features — fixation frequency (Gf), gaze density (Gd), head stability (Ga), head-body correlation (Gv), and spatial entropy (Gs) — to improve gaze direction accuracy.
+This repository provides an enhanced implementation of dynamic 3D gaze estimation, built upon the [GAFA framework](https://openaccess.thecvf.com/content/CVPR2022/html/Nonaka_Dynamic_3D_Gaze_From_Afar_Deep_Gaze_Estimation_From_Temporal_CVPR_2022_paper.html) (Nonaka et al., CVPR 2022). **GazeStateNet** integrates five gaze-state temporal features — fixation frequency (Gf), gaze density (Gd), head stability (Ga), head-body correlation (Gv), and spatial entropy (Gs) — to improve gaze direction accuracy.
 
 ### Key Results
 
-| Metric | Original GAFA | SimpleRHFD (Ours) | Improvement |
+| Metric | Original GAFA | GazeStateNet (Ours) | Improvement |
 |--------|:---:|:---:|:---:|
 | 3D MAE (all) | 21.69° | **21.49°** | -0.20° |
 | 3D MAE (front) | 20.70° | **19.96°** | -0.74° |
@@ -71,8 +71,8 @@ pip install pytorch-lightning efficientnet-pytorch albumentations opencv-python-
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/pluie666/SimpleRHFD-GazeNet.git
-cd SimpleRHFD-GazeNet
+git clone https://github.com/pluie666/GazeStateNet.git
+cd GazeStateNet
 pip install pytorch-lightning efficientnet-pytorch albumentations opencv-python-headless matplotlib tqdm
 ```
 
@@ -95,10 +95,10 @@ mv gazenet_GAFA.pth models/weights/
 ```bash
 python3 << 'EOF'
 import torch, cv2, numpy as np, matplotlib.pyplot as plt
-from models.gazenet import SimpleRHFDGazeNet
+from models.gazenet import GazeStateNet
 from dataloader.gafa import create_gafa_dataset
 
-model = SimpleRHFDGazeNet(n_frames=7).cuda()
+model = GazeStateNet(n_frames=7).cuda()
 model.load_pretrained_hbnet('models/weights/gazenet_GAFA.pth')
 model.eval()
 
@@ -119,7 +119,7 @@ EOF
 ### 4. Training
 
 ```bash
-# Train SimpleRHFD-GazeNet with frozen HBNet (recommended)
+# Train GazeStateNet with frozen HBNet (recommended)
 python train.py --simple --epoch 20 --n_frames 7 --gpus 1 \
   --batch_size 32 --freeze_hbnet \
   --weights ./models/weights/gazenet_GAFA.pth \
@@ -130,7 +130,7 @@ python train.py --simple --epoch 20 --n_frames 7 --gpus 1 \
 
 | Flag | Description |
 |------|-------------|
-| `--simple` | Use SimpleRHFD-GazeNet (minimal, stable) |
+| `--simple` | Use GazeStateNet (minimal, stable) |
 | `--freeze_hbnet` | Freeze pretrained HBNet (recommended) |
 | `--no_freeze_hbnet` | Allow HBNet fine-tuning |
 | `--no_probability_head` | Use direct regression head |
@@ -161,7 +161,7 @@ The model is trained and evaluated on the [Gaze from Afar (GAFA) dataset](https:
 
 ```
 ├── models/
-│   ├── gazenet.py          # SimpleRHFDGazeNet + original GazeNet
+│   ├── gazenet.py          # GazeStateNet + original GazeNet
 │   ├── hbnet.py            # HBNet (head/body direction estimation)
 │   ├── rhfd_features.py    # 5 RHFD temporal features (Gf,Gd,Ga,Gv,Gs)
 │   ├── rhfd_mapping.py     # Probability-first gaze mapping (experimental)

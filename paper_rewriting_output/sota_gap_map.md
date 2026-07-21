@@ -1,4 +1,4 @@
-# SOTA Gap Map — SimpleRHFD-GazeNet
+# SOTA Gap Map — GazeStateNet
 
 ## Current State of the Art on GAFA Benchmark
 
@@ -52,4 +52,4 @@ Efficiency: SimpleRHFD (770K) ≫ GAFA (9.5M) ≫ UAGE (>10M) ≫ GazeD (>20M)
 Speed:     SimpleRHFD (1-2ep) ≫ GAFA (50ep) ≫ GazeD (100ep)
 ```
 
-**Recommended framing**: "SimpleRHFD-GazeNet occupies the efficiency-accuracy Pareto frontier for GAFA gaze estimation — competitive accuracy at a fraction of the parameter and training cost of heavier SOTA methods."
+**Recommended framing**: "GazeStateNet occupies the efficiency-accuracy Pareto frontier for GAFA gaze estimation — competitive accuracy at a fraction of the parameter and training cost of heavier SOTA methods."

@@ -1,4 +1,4 @@
-# Reviewer Audit — SimpleRHFD-GazeNet
+# Reviewer Audit — GazeStateNet
 
 > PaperSpine V4 Gate 7: Pre-submission reviewer simulation.
 
@@ -86,7 +86,7 @@
 
 **Severity**: Low — but required for CVPR/ICCV.
 
-**Pre-emptive response**: Code is open-source at `https://github.com/pluie666/SimpleRHFD-GazeNet`. Include this in the paper.
+**Pre-emptive response**: Code is open-source at `https://github.com/pluie666/GazeStateNet`. Include this in the paper.
 
 ---
 

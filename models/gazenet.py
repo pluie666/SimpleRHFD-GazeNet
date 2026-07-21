@@ -696,7 +696,7 @@ class GazeNet(pl.LightningModule):
 # Simple RHFD-Enhanced GazeNet — minimal, stable enhancement
 # =============================================================================
 
-class SimpleRHFDGazeNet(pl.LightningModule):
+class GazeStateNet(pl.LightningModule):
     """
     Enhanced RHFD gaze network with multi-scale features + deep MLP + gating.
 

@@ -4,7 +4,7 @@
 - **scene**: conference
 - **tier**: pro
 - **output_language**: en
-- **target_name**: SimpleRHFD-GazeNet
+- **target_name**: GazeStateNet
 - **draft_path**: report.md
 - **translation_package**: zh
 - **word_output**: docx

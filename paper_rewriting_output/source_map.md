@@ -1,4 +1,4 @@
-# Source Map — SimpleRHFD-GazeNet
+# Source Map — GazeStateNet
 
 Maps all evidence sources to claims in the manuscript.
 

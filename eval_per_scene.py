@@ -16,11 +16,11 @@ opt = parser.parse_args()
 
 # Load model
 if opt.which == 'v7':
-    from models.gazenet_v7 import SimpleRHFDGazeNetV7
-    model = SimpleRHFDGazeNetV7(n_frames=7).cuda()
+    from models.gazenet_v7 import GazeStateNetV7
+    model = GazeStateNetV7(n_frames=7).cuda()
 else:
-    from models.gazenet import SimpleRHFDGazeNet
-    model = SimpleRHFDGazeNet(n_frames=7).cuda()
+    from models.gazenet import GazeStateNet
+    model = GazeStateNet(n_frames=7).cuda()
 
 ckpt = torch.load(opt.checkpoint, map_location='cuda', weights_only=False)
 model.load_state_dict(ckpt['state_dict'], strict=False)

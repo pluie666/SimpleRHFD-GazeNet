@@ -1,7 +1,7 @@
-"""Test SimpleRHFDGazeNet on GAFA test set with TTA (horizontal flip)."""
+"""Test GazeStateNet on GAFA test set with TTA (horizontal flip)."""
 import sys, torch, numpy as np
 sys.path.insert(0, '.')
-from models.gazenet import SimpleRHFDGazeNet
+from models.gazenet import GazeStateNet
 from dataloader.gafa import create_gafa_dataset
 from torch.utils.data import DataLoader
 from models.utils import compute_mae
@@ -13,7 +13,7 @@ parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--no_tta', action='store_true', help='Disable TTA')
 opt = parser.parse_args()
 
-model = SimpleRHFDGazeNet(n_frames=7).cuda()
+model = GazeStateNet(n_frames=7).cuda()
 ckpt = torch.load(opt.checkpoint, map_location='cuda', weights_only=False)
 model.load_state_dict(ckpt['state_dict'], strict=False)
 model.eval()

@@ -1,4 +1,4 @@
-# Writing Rationale Matrix — SimpleRHFD-GazeNet
+# Writing Rationale Matrix — GazeStateNet
 
 | Row | Unit | Function | Motivation Link | SOTA Pattern | Evidence | Change | Check |
 |-----|------|----------|----------------|--------------|----------|--------|-------|

@@ -1,4 +1,4 @@
-# Logic Transfer Audit — SimpleRHFD-GazeNet
+# Logic Transfer Audit — GazeStateNet
 
 Verifies that each contribution claim is consistently supported through the full paper chain.
 
