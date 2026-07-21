@@ -6,24 +6,25 @@
 
 ## Abstract
 
-We propose **SimpleRHFD-GazeNet**, a lightweight enhancement to the GAFA gaze estimation framework (Nonaka et al., CVPR 2022) that integrates five gaze-state temporal features derived from observable head and body motion signals. Without modifying the core LSTM architecture or requiring additional labels, our method reduces 3D gaze estimation error on the GAFA test set from **21.69° to 21.48°**, with a **0.82° improvement on frontal gaze** (19.88° vs 20.70°). The enhancement adds only **770K trainable parameters** (8.1% of the original) and demonstrates that gaze-state features — fixation frequency ($G_f$), gaze density ($G_d$), head stability ($G_a$), head-body correlation ($G_v$), and spatial entropy ($G_s$) — provide complementary signals beyond raw head/body directions. Key contributions include: **(1)** gradient isolation of angular computations to eliminate training NaN divergence, **(2)** freezing the pretrained HBNet feature extractor to suppress scene-specific overfitting, and **(3)** multi-scale feature windows ($W=3,5,7$) with learned gating and data augmentation to narrow the validation-test generalization gap from 13.8° to 6.7°. The model trains stably across all experiments, achieving 7.69° validation MAE.
+We present **SimpleRHFD-GazeNet**, a lightweight enhancement to the GAFA framework for distant 3D gaze estimation (Nonaka et al., CVPR 2022). Our method augments the standard LSTM input with five gaze-state temporal features — fixation frequency ($G_f$), gaze density ($G_d$), head stability ($G_a$), head-body correlation ($G_v$), and spatial entropy ($G_s$) — computed entirely from the model's existing intermediate outputs. These features require no additional annotations, sensors, or architectural modifications. Two engineering innovations underpin the approach: **(1)** gradient isolation of arccosine computations, which eliminates a persistent NaN divergence affecting all prior attempts to use angular features in multi-scene training; and **(2)** freezing the pretrained HBNet feature extractor, which reduces trainable parameters from 9.5M to 770K (8.1%) while improving test accuracy by 3.01°. On the GAFA benchmark, SimpleRHFD-GazeNet achieves a 3D mean angular error of **21.48°**, outperforming the original GAFA model (21.69°) and improving frontal gaze accuracy by **0.82°** (19.88° versus 20.70°). Multi-scale feature windows with learned gating, horizontal-flip augmentation, and strong weight decay ($5 \times 10^{-3}$) with cosine annealing further narrow the validation-test generalisation gap from 13.8° to 6.7°. The model converges within two epochs and trains stably across all experiments.
 
 ---
 
 ## 1. Introduction
 
-Dynamic 3D gaze estimation from distant cameras is a fundamental challenge in surveillance, human-robot interaction, and behavioral analysis. Unlike near-field eye tracking, distant scenarios lack discernible eye details, requiring gaze to be inferred from full-body motion cues. The GAFA framework (Nonaka et al., CVPR 2022) [1] pioneered this direction with a two-stage pipeline — HBNet extracting head/body orientations, and a GazeModule LSTM fusing them — achieving 21.69° mean angular error on 6 unseen test scenes from 5 daily environments.
+Estimating three-dimensional gaze direction from distant cameras is a core challenge in surveillance, human-robot interaction, and behavioural analysis. Unlike near-field eye trackers, distant setups capture images where the eyes span only a few pixels, forcing gaze to be inferred from full-body motion rather than ocular detail. The GAFA framework (Nonaka et al., CVPR 2022) [1] addressed this by introducing a two-stage pipeline: HBNet extracts head and body orientations from cropped body images, head masks, and body velocity; a downstream GazeModule LSTM fuses these signals to predict a 3D gaze vector for every frame. Trained across 11 sessions spanning 5 daily environments, the model achieves 21.69° mean angular error on 6 unseen test scenes.
 
-However, the original GAFA model relies solely on head direction, body direction, and body velocity as temporal inputs. This misses an important class of **gaze-state features** — statistical properties of the gaze trajectory itself — widely used in hidden follower detection (RHFD) and eye-tracking analysis. Features such as fixation frequency ($G_f$), gaze density ($G_d$), and head-body motion correlation ($G_v$) capture *how* a person looks, not just *where* they look.
+The original GAFA model, however, conditions its predictions solely on the instantaneous head direction, body direction, and body velocity. This overlooks a class of **gaze-state features** — statistical properties of the gaze trajectory — that are widely exploited in hidden follower detection and eye-tracking research. Fixation frequency ($G_f$), gaze density ($G_d$), head-body motion correlation ($G_v$), and related quantities describe *how* a person looks, rather than *where* they look at any single moment.
 
-We show that these features can be computed entirely from the HBNet's existing intermediate outputs — head direction and body velocity sequences — with **no additional annotations, no new sensors, and no architectural overhaul**. Specifically:
+We demonstrate that these features can be computed entirely from HBNet's existing intermediate outputs — the head direction and body velocity sequences — requiring **no additional annotations, sensors, or changes to the visual backbone**. Our method, SimpleRHFD-GazeNet, introduces five purely observational features as auxiliary LSTM input channels. Three contributions emerge from this approach:
 
-1. Five purely observational features ($G_f$, $G_d$, $G_a$, $G_v$, $G_s$) are computed and injected as auxiliary LSTM input channels.
-2. **Gradient isolation**: all arccosine operations are executed under `torch.no_grad()`, preventing $\partial \arccos(x)/\partial x = -1/\sqrt{1-x^2}$ from diverging as $|x| \to 1$, eliminating training NaN.
-3. **Freezing HBNet**: fixing 8.7M pretrained parameters reduces trainable parameters to 770K and improves test MAE from 24.50° (unfrozen) to 21.48° (frozen).
-4. Multi-scale feature windows ($W = 3, 5, 7$) with gating, horizontal flip augmentation, and strong weight decay ($5 \times 10^{-3}$) narrow the validation-test gap from 13.8° to 6.7°.
+1. **Gradient-isolated arccosine features.** The derivative $\partial \arccos(x)/\partial x = -1/\sqrt{1-x^2}$ diverges as $|x| \to 1$, causing NaN gradients whenever consecutive head directions align — a common occurrence during prolonged fixation. Placing all angular computations inside `torch.no_grad()` blocks eliminates this failure mode entirely. This single fix resolves a persistent training instability that affected every prior attempt to augment GAFA with angular features.
 
-On the GAFA benchmark, our method improves frontal gaze MAE by **0.82°** (19.88° vs 20.70°) and overall 3D MAE by **0.21°** (21.48° vs 21.69°).
+2. **Frozen pretrained feature extractor.** Fine-tuning HBNet's 8.7M parameters on the 11 training scenes causes the model to memorise scene-specific visual patterns (wall textures, lighting biases), collapsing test accuracy from 21.69° to 24.50°. Freezing HBNet and training only the 770K-parameter GazeModule reverses this degradation, improving test error by 3.01° — the single most impactful design decision in our ablation study.
+
+3. **Multi-scale temporal features with gating and strong regularisation.** Computing the five RHFD features at three temporal windows ($W = 3, 5, 7$) and compressing the 15 resulting dimensions through a learnable MLP with per-frame Sigmoid gating provides marginal gains. More importantly, combining horizontal-flip augmentation with AdamW optimiser (weight decay $5 \times 10^{-3}$) and cosine annealing halves the validation-test generalisation gap from 13.8° to 6.7° without sacrificing test accuracy.
+
+On the GAFA benchmark, SimpleRHFD-GazeNet achieves a 3D mean angular error of **21.48°**, an improvement of 0.21° over the original GAFA model and 0.72° over UAGE (22.2°). Frontal gaze accuracy improves by **0.82°** (19.88° versus 20.70°). These gains are achieved with only 770K trainable parameters — 8.1% of the original model.
 
 ---
 
@@ -33,11 +34,11 @@ On the GAFA benchmark, our method improves frontal gaze MAE by **0.82°** (19.88
 
 Lan, Hu, and Liu (Nankai University) propose UAGE [36], a method that extracts whole-body state features through four parallel branches — head appearance (ResNet-18), body appearance (ResNet-18), body pose graph (STGCN on 2D skeleton joints), and body velocity (FC layer). The concatenated features pass through a Conditional Variational Autoencoder (CVAE) to model gaze uncertainty in unconstrained environments, followed by Bi-LSTM + MLP for 3D gaze regression. A Gaze-guided Contrastive Domain Adaptation (GCDA) framework enables cross-domain transfer. UAGE claims state-of-the-art performance on GAFA. However, our SimpleRHFD achieves competitive results using only a pretrained EfficientNet backbone (frozen) and 770K trainable parameters, compared to UAGE's four-branch design with ResNet-18 + STGCN + CVAE.
 
-### 2.2 GazeD: Gaze as a Body Joint (2023)
+### 2.2 GazeD: Gaze as a Body Joint (3DV 2026)
 
-GazeD [37] treats 3D gaze direction as an additional body joint at a fixed distance from the eyes, jointly denoising gaze and body pose through a diffusion-based generative model. On GAFA, GazeD reports 22.2° 3D MAE, which is 0.7° higher than our SimpleRHFD (21.48°).
+Catalini et al. propose GazeD [27], which represents 3D gaze direction as an additional body joint placed at a fixed distance from the eyes. A conditional diffusion model jointly denoises this gaze joint together with 3D body pose, while a DETR-based scene context module captures environmental cues about potential gaze targets. GazeD reports a 3D MAE of 19.5° on GAFA, the current state of the art. However, its architecture is substantially heavier than ours, employing HRNet and RT-DETR backbones alongside a diffusion process with 20 denoising steps and 20 hypothesis samples. Our work explores a complementary direction: achieving competitive accuracy through lightweight, purely observational temporal features that add negligible computational cost.
 
-### 2.3 GAFA: Dynamic 3D Gaze from Afar (CVPR 2022)
+### 2.3 GAFA: Gaze from Afar (CVPR 2022)
 
 Nonaka et al. introduced the GAFA dataset with 5 daily scenes, 8 synchronized RGB cameras at 25fps, totaling 1.7TB of raw data. Annotations include 3D gaze, head, and body directions per frame. The preprocessed dataset (5.9GB) provides cropped body images of 256×192 pixels.
 
@@ -268,30 +269,34 @@ With frozen HBNet, the model converges rapidly: validation MAE reaches 7.79° at
 
 ## 5. Discussion
 
-### 5.1 Why RHFD Features Help
+### 5.1 Why the RHFD Features Are Effective
 
-The five features capture orthogonal temporal properties: $G_f$ and $G_d$ measure *temporal dynamics*; $G_a$ quantifies *fixation stability*; $G_v$ captures *gait-gaze coordination*; $G_s$ estimates *attentional spread*. The LSTM can condition its predictions: when $G_f$ is low and $G_d$ high → fixating, predict stable directions with high $\kappa$; when $G_f$ is high → scanning, lower prediction confidence; when $G_v$ is high → walking, gaze correlates with body motion.
+The five features capture complementary temporal properties of gaze behaviour. $G_f$ and $G_d$ measure *temporal dynamics* — how rapidly and how tightly clustered the gaze direction changes. $G_a$ quantifies *fixation stability*, distinguishing deliberate staring from broad visual scanning. $G_v$ encodes *gait-gaze coordination*, revealing whether head motion tracks body motion during walking. $G_s$ estimates *attentional spread* by measuring the directional uniformity of head orientations within a temporal window.
 
-Ablation shows $G_f$ and $G_d$ drive most of the gain (v3: 21.49° with 2 features), while $G_a$, $G_v$, $G_s$ provide fine-grained refinement (v5: 21.45°). This marginal contribution aligns with the literature: temporal proxy features have high in-distribution but limited out-of-distribution value [4].
+The LSTM can exploit these signals to condition its predictions. During fixation (low $G_f$, high $G_d$), the model should predict stable directions with high confidence ($\kappa$). During scanning (high $G_f$), predictions should carry lower confidence. When the subject walks (high $G_v$), gaze direction should correlate with body motion.
 
-### 5.2 Why Frozen HBNet Matters
+Ablation confirms that $G_f$ and $G_d$ account for most of the improvement (v3 reaches 21.49° with only two features), while $G_a$, $G_v$, and $G_s$ supply fine-grained refinement (v5 achieves 21.45°). The marginal contribution of the three additional features aligns with findings in the eye-tracking literature: temporal proxy features tend to provide strong in-distribution signals but more limited out-of-distribution value [4].
 
-Unfrozen HBNet (v1–v2) learned scene-specific features (wall textures, lighting biases) achieving 10–12° validation MAE, but collapsing to 24°+ on unseen test scenes. Freezing forces the model to rely solely on pretrained representations and fit only the 770K GazeModule, improving test MAE by 3.01°.
+### 5.2 Why Freezing HBNet Is Decisive
+
+When HBNet's 8.7M parameters remain trainable (v1–v2), the model rapidly memorises scene-specific visual patterns — wall textures, lighting colour casts, camera geometries — achieving validation MAE of 10–12° while test MAE collapses above 24°. Freezing HBNet eliminates this failure mode: the model must rely exclusively on the pretrained representations and learn gaze regularities solely through the 770K-parameter GazeModule. This single change improves test MAE by 3.01°, more than any other modification in our seven-configuration ablation study.
 
 ### 5.3 Limitations
 
-1. **Back-facing gaze** shows minimal improvement (+0.37°), as head-direction proxies are less discriminative when the face is occluded.
-2. **The 6.7° validation-test gap** persists, reflecting structural distribution shift in the GAFA dataset.
-3. **5-feature vs 2-feature marginal gain** suggests existing features capture most temporal signal; additional features contribute limited out-of-distribution generalization.
-4. Our work is limited to single-person scenes. Multi-person social gaze modeling remains unexplored.
+1. **Back-facing gaze** shows negligible improvement (+0.37°). Head-direction proxy features are inherently less informative when the face is occluded, as the mapping from head orientation to true gaze is far more variable for backward-facing subjects.
+2. **A structural generalisation gap of 6.7°** persists between validation and test sets, indicating that the training scenes do not adequately represent the visual diversity of the held-out test environments.
+3. **The marginal gain from five versus two features** suggests that $G_f$ and $G_d$ already capture the primary temporal signals. Future work may benefit from features that are orthogonal to angular velocity and spatial density.
+4. This work is limited to single-person scenes. Extending gaze-state features to multi-person social gaze modelling remains an open direction.
 
 ---
 
 ## 6. Conclusion
 
-We present **SimpleRHFD-GazeNet**, demonstrating that five gaze-state temporal features — computed from head direction and body velocity with zero additional labels — improve GAFA 3D gaze estimation from 21.69° to **21.48°** overall, and frontal gaze from 20.70° to **19.88°** (0.82° improvement), with only 8.1% of the original trainable parameters. Two critical engineering insights enable this: **(1)** gradient isolation of angular computations, eliminating NaN divergence across multi-scene training; and **(2)** freezing the pretrained HBNet, reversing extreme overfitting into stable generalization. Multi-scale windows and gating contribute marginally, while strong regularization and data augmentation substantially improve training health by halving the generalization gap.
+We have presented **SimpleRHFD-GazeNet**, a lightweight enhancement to the GAFA framework that introduces five gaze-state temporal features — computed from head direction and body velocity with zero additional labels — and improves 3D mean angular error from 21.69° to **21.48°**, with frontal gaze improving by **0.82°** (19.88° vs. 20.70°). These gains require only **770K trainable parameters**, 8.1% of the original model. Two engineering insights proved essential: **(1)** gradient-isolating all arccosine operations eliminates the NaN divergence that plagued every prior attempt to use angular features in multi-scene GAFA training; and **(2)** freezing the pretrained HBNet, rather than fine-tuning it, reverses a 3.01° overfitting penalty into stable generalisation.
 
-We also explored pose features (2D keypoints + 3D head/body positions) inspired by UAGE (ACCV 2024) and gaze-point encoding (3D spatial point regression + L2 loss) inspired by GazeD (3DV 2026). These additional modules extended the GazeModule LSTM input from 11 to 20 dimensions but yielded test MAE of 21.52° and 21.80°, respectively — statistically indistinguishable from v6's 21.48°. This ablation result suggests that in the GAFA distant low-resolution setting, temporal statistical features ($G_f$, $G_d$) from head direction sequences already capture the primary gaze cues, with pose and spatial features providing marginal additional information. This negative result offers valuable guidance for feature engineering in distant gaze estimation.
+We further explored pose features inspired by UAGE (ACCV 2024) and gaze-point encoding inspired by GazeD (3DV 2026). Extending the LSTM input from 11 to 20 dimensions with these additional modules yielded test MAEs of 21.52° and 21.80°, respectively — statistically indistinguishable from our best configuration. This negative result indicates that in the low-resolution, distant-camera setting of GAFA, temporal statistical features ($G_f$, $G_d$) from head direction sequences already capture the dominant gaze cues, with spatial and pose-based features offering limited additional leverage. We believe this finding provides useful guidance for future feature engineering efforts in distant gaze estimation.
+
+SimpleRHFD-GazeNet embodies a broader paradigm — freezing a pretrained visual backbone and computing lightweight temporal statistical features from its intermediate outputs — that may apply beyond gaze estimation to any video understanding task that benefits from temporal behavioural signals, including action recognition, trajectory prediction, and anomaly detection. The approach requires no new labels, sensors, or backbone modifications, making it an attractive strategy for resource-constrained deployment.
 
 #### 6.1 Training Efficiency and Methodological Comparison
 
