@@ -192,8 +192,8 @@ We report 3D (full direction) and 2D (image-plane projection) MAE, split by fron
 | Method | 3D All (°) | 2D All (°) | 3D Front (°) | 3D Back (°) | Trainable Params |
 |--------|:---:|:---:|:---:|:---:|:---:|
 | GAFA [1] | 21.69 | 20.89 | 20.70 | 23.21 | 9.5M |
-| UAGE [15] | 20.5 | 19.4 | 18.8 | 23.7 | — |
-| GazeD [12] | **19.5** | 20.5 | — | — | — |
+| UAGE [15] | 20.5 | 19.4 | 18.8 | 23.7 | >10M |
+| GazeD [16] | **19.5** | 20.5 | — | — | >20M |
 | **GazeStateNet (ours)** | **21.48** | **20.54** | **19.88** | 23.58 | **770K** |
 | *Δ vs GAFA* | *−0.21* | *−0.35* | *−0.82* | *+0.37* | *−91.9%* |
 
@@ -210,8 +210,6 @@ We report 3D (full direction) and 2D (image-plane projection) MAE, split by fron
 † Per GazeD/UAGE evaluation protocol (reproduced Nonaka et al. numbers).
 
 Note: GAFA [1] reports front/back breakdown (Section 6.1.2). UAGE and GazeD do not provide this dimension, so front/back comparison is only against the GAFA baseline.
-
-![Results Table](figs/fig_results_table.png)
 
 The 0.82° frontal gaze improvement is our most significant finding. The marginal back-gaze regression (+0.37°) is expected: head-direction proxy features are less discriminative when the face is not visible. The overall 3D improvement of 0.21° is achieved with only 8.1% of the original trainable parameters.
 
