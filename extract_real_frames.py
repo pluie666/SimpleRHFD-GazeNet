@@ -28,8 +28,8 @@ for sample_idx in [0, 5, 10, 20, 50]:
     gaze = batch["gaze_dir"].numpy()       # [7, 3]
 
     # ── INPUT FRAMES ──
-    fig, axes = plt.subplots(1, 7, figsize=(16, 3.5),
-                              facecolor="white", gridspec_kw={"wspace": 0.05})
+    fig, axes = plt.subplots(7, 1, figsize=(2.8, 18),
+                              facecolor="white", gridspec_kw={"hspace": 0.05})
     for i in range(7):
         ax = axes[i]
         frame = denorm(img[i])
@@ -44,14 +44,14 @@ for sample_idx in [0, 5, 10, 20, 50]:
         ax.set_title(f"t={i+1}", fontsize=9, pad=2)
         ax.axis("off")
     fig.suptitle("Input Sequence (Head Mask M in red dashed)", fontsize=12, fontweight="bold", y=1.02)
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.05, right=0.95, top=0.97, bottom=0.02)
     fig.savefig(f"figs/frames/input_real_{sample_idx}.png", dpi=200, bbox_inches="tight")
     fig.savefig(f"figs/frames/input_real_{sample_idx}.pdf", bbox_inches="tight")
     plt.close(fig)
 
     # ── OUTPUT FRAMES ──
-    fig, axes = plt.subplots(1, 7, figsize=(16, 3.5),
-                              facecolor="white", gridspec_kw={"wspace": 0.05})
+    fig, axes = plt.subplots(7, 1, figsize=(2.8, 18),
+                              facecolor="white", gridspec_kw={"hspace": 0.05})
     for i in range(7):
         ax = axes[i]
         frame = denorm(img[i])
@@ -65,7 +65,7 @@ for sample_idx in [0, 5, 10, 20, 50]:
         ax.set_title(f"t={i+1}", fontsize=9, pad=2)
         ax.axis("off")
     fig.suptitle("Output Sequence (Ground Truth Gaze in green)", fontsize=12, fontweight="bold", y=1.02)
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.05, right=0.95, top=0.97, bottom=0.02)
     fig.savefig(f"figs/frames/output_real_{sample_idx}.png", dpi=200, bbox_inches="tight")
     fig.savefig(f"figs/frames/output_real_{sample_idx}.pdf", bbox_inches="tight")
     plt.close(fig)
