@@ -15,8 +15,13 @@ def denorm(img):
     img = img.transpose(1,2,0) * STD + MEAN
     return np.clip(img, 0, 1)
 
-# Pick a scene that has clear body images
-dset = create_gafa_dataset(7, ["living_room/004"], root_dir="./data/preprocessed", interval=30)
+# Pick across ALL training scenes for diversity
+all_scenes = [
+    "library/1026_3", "library/1028_2", "lab/1013_1", "lab/1014_1",
+    "kitchen/1022_4", "kitchen/1015_4", "living_room/004", "living_room/005",
+    "courtyard/004", "courtyard/005",
+]
+dset = create_gafa_dataset(7, all_scenes, root_dir="./data/preprocessed", interval=30)
 
 os.makedirs("figs/frames", exist_ok=True)
 
