@@ -214,8 +214,8 @@ $$\text{MAE} = \frac{1}{N} \sum_{i=1}^{N} \arccos\left(\hat{\mathbf{g}}_i \cdot 
 | 方法 | 3D 总体 (°) | 2D 总体 (°) | 3D 正面 (°) | 3D 背面 (°) | 可训练参数 |
 |------|:---:|:---:|:---:|:---:|:---:|
 | GAFA [1] | 21.69 | 20.89 | 20.70 | 23.21 | 9.5M |
-| UAGE [26] | 20.5 | 19.4 | 18.8 | 23.7 | — |
-| GazeD [27] | **19.5** | 20.5 | — | — | — |
+| UAGE [15] | 20.5 | 19.4 | 18.8 | 23.7 | — |
+| GazeD [12] | **19.5** | 20.5 | — | — | — |
 | **GazeStateNet（本文）** | **21.48** | **20.54** | **19.88** | 23.58 | **770K** |
 | *vs GAFA* | *−0.21* | *−0.35* | *−0.82* | *+0.37* | *−91.9%* |
 
@@ -224,9 +224,9 @@ $$\text{MAE} = \frac{1}{N} \sum_{i=1}^{N} \arccos\left(\hat{\mathbf{g}}_i \cdot 
 | 方法 | Office | Living Room | Kitchen | Library | Courtyard | 正面 | 背面 | 总体 |
 |------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | GAFA [1]† | 14.4 | 25.1 | 20.4 | 19.8 | 25.4 | 20.7 | 23.2 | 21.7 |
-| UAGE [26] | 15.3 | 23.5 | 18.1 | 18.7 | 23.8 | 18.8 | 23.7 | 20.5 |
-| GazeD [27] (AVG) | 15.8 | **19.3** | 18.2 | **17.6** | 25.3 | — | — | **19.5** |
-| GazeD [27] (Oracle) | **11.6** | 13.2 | **14.6** | 14.2 | **23.9** | — | — | **15.9** |
+| UAGE [15] | 15.3 | 23.5 | 18.1 | 18.7 | 23.8 | 18.8 | 23.7 | 20.5 |
+| GazeD [12] (AVG) | 15.8 | **19.3** | 18.2 | **17.6** | 25.3 | — | — | **19.5** |
+| GazeD [12] (Oracle) | **11.6** | 13.2 | **14.6** | 14.2 | **23.9** | — | — | **15.9** |
 | **GazeStateNet（本文）** | **14.3** | 24.7 | 18.8 | 19.5 | 25.8 | 20.0 | 23.5 | 21.5 |
 
 † 使用 GazeD/UAGE 评估协议。GazeD 和 UAGE 报告了 Nonaka 等人的复现数字。
@@ -323,7 +323,7 @@ LSTM 可以学习条件化预测：当 $G_f$ 低、$G_d$ 高 → 被试正在专
 
 下表对比了三类方法的训练配置与推理复杂度：
 
-| | GAFA [1] | UAGE [26] | GazeD [27] | **GazeStateNet** |
+| | GAFA [1] | UAGE [15] | GazeD [12] | **GazeStateNet** |
 |------|:---:|:---:|:---:|:---:|
 | 视觉骨干 | EfficientNet-B0 | ResNet-18 × 4 + STGCN | HRNet + RT-DETR | EfficientNet-B0（冻结） |
 | 不确定性 | vMF κ | CVAE | 扩散模型 H=20, N=20 | vMF κ |
@@ -373,17 +373,17 @@ LSTM 可以学习条件化预测：当 $G_f$ 低、$G_d$ 高 → 被试正在专
 
 [12] N. Srivastava, G. Hinton, A. Krizhevsky, I. Sutskever, and R. Salakhutdinov. Dropout: A Simple Way to Prevent Neural Networks from Overfitting. *Journal of Machine Learning Research*, 15(1):1929-1958, 2014.
 
-[13] I. Loshchilov and F. Hutter. SGDR: Stochastic Gradient Descent with Warm Restarts. In *Proc. Int. Conf. Learning Representations (ICLR)*, 2017.
+[11] I. Loshchilov and F. Hutter. SGDR: Stochastic Gradient Descent with Warm Restarts. In *Proc. Int. Conf. Learning Representations (ICLR)*, 2017.
 
 [14] A. Krizhevsky, I. Sutskever, and G. E. Hinton. ImageNet Classification with Deep Convolutional Neural Networks. In *Advances in Neural Information Processing Systems (NeurIPS)*, pp. 1097-1105, 2012.
 
 [15] K. He, X. Zhang, S. Ren, and J. Sun. Deep Residual Learning for Image Recognition. In *Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)*, pp. 770-778, 2016.
 
-[16] A. Paszke, S. Gross, F. Massa, et al. PyTorch: An Imperative Style, High-Performance Deep Learning Library. In *Advances in Neural Information Processing Systems (NeurIPS)*, pp. 8024-8035, 2019.
+[12] A. Paszke, S. Gross, F. Massa, et al. PyTorch: An Imperative Style, High-Performance Deep Learning Library. In *Advances in Neural Information Processing Systems (NeurIPS)*, pp. 8024-8035, 2019.
 
-[17] W. Falcon et al. PyTorch Lightning. 2019. https://github.com/Lightning-AI/lightning.
+[11] W. Falcon et al. PyTorch Lightning. 2019. https://github.com/Lightning-AI/lightning.
 
-[18] D. P. Kingma and J. Ba. Adam: A Method for Stochastic Optimization. In *Proc. Int. Conf. Learning Representations (ICLR)*, 2015.
+[14] D. P. Kingma and J. Ba. Adam: A Method for Stochastic Optimization. In *Proc. Int. Conf. Learning Representations (ICLR)*, 2015.
 
 [19] T. Baltrusaitis, P. Robinson, and L.-P. Morency. OpenFace: An Open Source Facial Behavior Analysis Toolkit. In *Proc. IEEE Winter Conf. Applications of Computer Vision (WACV)*, pp. 1-10, 2016.
 
@@ -399,6 +399,24 @@ LSTM 可以学习条件化预测：当 $G_f$ 低、$G_d$ 高 → 被试正在专
 
 [25] A. Fathi, J. K. Hodgins, and J. M. Rehg. Social Interactions: A First-Person Perspective. In *Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)*, pp. 1226-1233, 2012.
 
-[26] E. Lan, Z. Hu, and J. Liu. UAGE: A Supervised Contrastive Method for Unconstrained Adaptive Gaze Estimation. In *Proc. Asian Conf. Computer Vision (ACCV)*, 2024.
+[15] E. Lan, Z. Hu, and J. Liu. UAGE: A Supervised Contrastive Method for Unconstrained Adaptive Gaze Estimation. In *Proc. Asian Conf. Computer Vision (ACCV)*, 2024.
 
-[27] GazeD: Context-Aware Diffusion for Accurate 3D Gaze Estimation. *arXiv preprint*, 2023.
+[12] GazeD: Context-Aware Diffusion for Accurate 3D Gaze Estimation. *arXiv preprint*, 2023.## 参考文献
+
+[1] S. Nonaka, S. Nobuhara, and K. Nishino. Dynamic 3D Gaze from Afar. In *Proc. IEEE/CVF CVPR*, pp.2192-2201, 2022.
+[2] N. I. Fisher et al. *Statistical Analysis of Spherical Data*. Cambridge, 1987.
+[3] I. Loshchilov and F. Hutter. Decoupled Weight Decay Regularization. In *Proc. ICLR*, 2019.
+[4] M. Tan and Q. V. Le. EfficientNet. In *Proc. ICML*, pp.6105-6114, 2019.
+[5] S. Hochreiter and J. Schmidhuber. Long Short-Term Memory. *Neural Computation*, 9(8):1735-1780, 1997.
+[6] X. Zhang et al. Appearance-Based Gaze Estimation in the Wild. In *Proc. IEEE/CVF CVPR*, pp.4511-4520, 2015.
+[7] P. Kellnhofer et al. Gaze360. In *Proc. IEEE/CVF ICCV*, pp.6912-6921, 2019.
+[8] T. Fischer et al. RT-GENE. In *Proc. ECCV*, pp.334-352, 2018.
+[9] Y. Sugano et al. Learning-by-Synthesis. In *Proc. IEEE/CVF CVPR*, pp.1821-1828, 2014.
+[10] K. Krafka et al. Eye Tracking for Everyone. In *Proc. IEEE/CVF CVPR*, pp.2176-2184, 2016.
+[11] I. Loshchilov and F. Hutter. SGDR. In *Proc. ICLR*, 2017.
+[12] A. Paszke et al. PyTorch. In *NeurIPS*, pp.8024-8035, 2019.
+[13] W. Falcon et al. PyTorch Lightning. 2019.
+[14] D. P. Kingma and J. Ba. Adam. In *Proc. ICLR*, 2015.
+[15] E. Lan et al. UAGE. In *Proc. ACCV*, 2024.
+[16] R. Catalini et al. GazeD. In *Proc. 3DV*, pp.760-770, 2026.
+[17] Y. Chen et al. Hidden Follower Detection via Refined Gaze and Walking State Estimation. In *Proc. IEEE ICME*, pp.2081-2086, 2023.
