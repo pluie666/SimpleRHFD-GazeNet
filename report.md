@@ -235,7 +235,10 @@ Figures 3–4 show representative gaze predictions. Green arrows = ground truth,
 | **v3** | **+5 feat, frozen HBNet** | **7.7** | **21.49** | **Freezing decisive** |
 | v4 | +deeper MLP (3-layer + Dropout 0.1) | 12.9 | 22.36 | Over-parameterization |
 | v5 | +multi-scale $W$=3,5,7 + gating | 7.6 | 21.45 | Marginal gain |
-| **v6** | **+H-flip aug + wd=5e−3** | **14.8** | **21.48** | **Generalization gap halved** |
+| **v6** | **+H-flip aug + wd=5e−3** | **14.8** | **21.48** | **Generalisation gap halved** |
+| v7 | +GazeD gaze-point + UAGE pose features | 19.9 | 21.52 | Extra spatial features ineffective |
+| v7b | v7 + head_pos fix | 17.8 | 21.80 | Confirms temporal features sufficient |
+| v8 | Unfrozen HBNet + all regularisation | 14.1 | 21.66 | **Unfreezing does not help; freezing is optimal** |
 
 ![Ablation Study](figs/fig_ablation.png)
 
@@ -279,7 +282,7 @@ Ablation confirms that $G_f$ and $G_d$ account for most of the improvement (v3 r
 
 ### 5.2 Why Freezing HBNet Is Decisive
 
-When HBNet's 8.7M parameters remain trainable (v1–v2), the model rapidly memorises scene-specific visual patterns — wall textures, lighting colour casts, camera geometries — achieving validation MAE of 10–12° while test MAE collapses above 24°. Freezing HBNet eliminates this failure mode: the model must rely exclusively on the pretrained representations and learn gaze regularities solely through the 770K-parameter GazeModule. This single change improves test MAE by 3.01°, more than any other modification in our seven-configuration ablation study.
+When HBNet's 8.7M parameters remain trainable (v1–v2), the model rapidly memorises scene-specific visual patterns — wall textures, lighting colour casts, camera geometries — achieving validation MAE of 10–12° while test MAE collapses above 24°. Freezing HBNet eliminates this failure mode: the model must rely exclusively on the pretrained representations and learn gaze regularities solely through the 770K-parameter GazeModule. This single change improves test MAE by 3.01°, more than any other modification in our eight-configuration ablation study. We further verified this by training v8 — unfrozen HBNet with full regularisation (augmentation, weight decay $5 \times 10^{-3}$, cosine annealing) — which achieved 21.66°, still 0.18° worse than v6's 21.48°. Together, these results establish that freezing the pretrained backbone is not merely a convenient shortcut but the optimal design choice for the GAFA benchmark.
 
 ### 5.3 Limitations
 
