@@ -36,7 +36,7 @@ Lan, Hu, and Liu (Nankai University) propose UAGE [15], a method that extracts w
 
 ### 2.2 GazeD: Gaze as a Body Joint (3DV 2026)
 
-Catalini et al. propose GazeD [12], which represents 3D gaze direction as an additional body joint placed at a fixed distance from the eyes. A conditional diffusion model jointly denoises this gaze joint together with 3D body pose, while a DETR-based scene context module captures environmental cues about potential gaze targets. GazeD reports a 3D MAE of 19.5° on GAFA, the current state of the art. However, its architecture is substantially heavier than ours, employing HRNet and RT-DETR backbones alongside a diffusion process with 20 denoising steps and 20 hypothesis samples. Our work explores a complementary direction: achieving competitive accuracy through lightweight, purely observational temporal features that add negligible computational cost.
+Catalini et al. propose GazeD [16], which represents 3D gaze direction as an additional body joint placed at a fixed distance from the eyes. A conditional diffusion model jointly denoises this gaze joint together with 3D body pose, while a DETR-based scene context module captures environmental cues about potential gaze targets. GazeD reports a 3D MAE of 19.5° on GAFA, the current state of the art. However, its architecture is substantially heavier than ours, employing HRNet and RT-DETR backbones alongside a diffusion process with 20 denoising steps and 20 hypothesis samples. Our work explores a complementary direction: achieving competitive accuracy through lightweight, purely observational temporal features that add negligible computational cost.
 
 ### 2.3 GAFA: Gaze from Afar (CVPR 2022)
 
@@ -203,8 +203,8 @@ We report 3D (full direction) and 2D (image-plane projection) MAE, split by fron
 |--------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | GAFA [1]† | 14.4 | 25.1 | 20.4 | 19.8 | 25.4 | 20.7 | 23.2 | 21.7 |
 | UAGE [15] | 15.3 | 23.5 | 18.1 | 18.7 | 23.8 | 18.8 | 23.7 | 20.5 |
-| GazeD [12] (AVG) | 15.8 | **19.3** | 18.2 | **17.6** | 25.3 | — | — | **19.5** |
-| GazeD [12] (Oracle) | **11.6** | 13.2 | **14.6** | 14.2 | **23.9** | — | — | **15.9** |
+| GazeD [16] (AVG) | 15.8 | **19.3** | 18.2 | **17.6** | 25.3 | — | — | **19.5** |
+| GazeD [16] (Oracle) | **11.6** | 13.2 | **14.6** | 14.2 | **23.9** | — | — | **15.9** |
 | **GazeStateNet (ours)** | **14.3** | 24.7 | 18.8 | 19.5 | 25.8 | 20.0 | 23.5 | 21.5 |
 
 † Per GazeD/UAGE evaluation protocol (reproduced Nonaka et al. numbers).
@@ -301,7 +301,7 @@ GazeStateNet embodies a broader paradigm — freezing a pretrained visual backbo
 
 #### 6.1 Training Efficiency and Methodological Comparison
 
-| | GAFA [1] | UAGE [15] | GazeD [12] | **GazeStateNet** |
+| | GAFA [1] | UAGE [15] | GazeD [16] | **GazeStateNet** |
 |------|:---:|:---:|:---:|:---:|
 | Vision backbone | EfficientNet-B0 | ResNet-18 × 4 + STGCN | HRNet + RT-DETR | EfficientNet-B0 (frozen) |
 | Uncertainty | vMF κ | CVAE | Diffusion H=20, N=20 | vMF κ |
