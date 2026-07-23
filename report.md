@@ -360,6 +360,6 @@ Future work may pursue: (1) larger and more diverse training scenes to close the
 
 [15] E. Lan, Z. Hu, and J. Liu. UAGE: A Supervised Contrastive Method for Unconstrained Adaptive Gaze Estimation. In *Proc. Asian Conf. Computer Vision (ACCV)*, 2024.
 
-[16] R. Catalini et al. GazeD: Context-Aware Diffusion for Accurate 3D Gaze Estimation. In *Proc. Int. Conf. 3D Vision (3DV)*, 2026.
+[16] R. Catalini et al. GazeD: Context-Aware Diffusion for Accurate 3D Gaze Estimation. In *Proc. Int. Conf. 3D Vision (3DV)*, pp. 760–770, 2026.
 
 [17] Y. Chen, R. Hu, D. Xu, Z. Wang, L. Luo, and D. Li. Hidden Follower Detection via Refined Gaze and Walking State Estimation. In *Proc. IEEE Int. Conf. Multimedia and Expo (ICME)*, pp. 2081-2086, 2023.
